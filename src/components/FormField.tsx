@@ -13,7 +13,7 @@ export function FormField({ label, rightAdornment, onPressRightAdornment, style,
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputWrap}>
-        <TextInput style={[styles.input, style]} placeholderTextColor="#6aa66e" {...inputProps} />
+        <TextInput style={[ styles.input, style ]} placeholderTextColor={colors.brandBorder} {...inputProps} />
         {rightAdornment ? (
           <Pressable
             onPress={onPressRightAdornment}
@@ -32,7 +32,7 @@ export function FormField({ label, rightAdornment, onPressRightAdornment, style,
 
 const styles = StyleSheet.create({
   wrap: { marginBottom: 14 },
-  label: { fontSize: 16, fontWeight: "600", color: colors.text, marginBottom: 8 },
+  label: { fontFamily: "Jost", fontSize: 16, fontWeight: "400", color: colors.textBlack, marginBottom: 8 },
   inputWrap: { position: "relative" },
   input: {
     height: 48,
@@ -41,15 +41,9 @@ const styles = StyleSheet.create({
     borderColor: colors.brandBorder,
     backgroundColor: colors.brandMint,
     paddingHorizontal: 14,
-    color: colors.text,
+    color: colors.textBlack,
+    fontFamily: "Jost",
     fontSize: 16,
   },
-  adornment: {
-    position: "absolute",
-    right: 12,
-    top: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  adornment: { position: "absolute", right: 12, top: 0, bottom: 0, justifyContent: "center", alignItems: "center" },
 })

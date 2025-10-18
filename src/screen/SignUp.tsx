@@ -1,16 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {
-  View,
-  Text as RNText,
-  StyleSheet,
-  Modal,
-  Pressable,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native"
+import { View, Text, StyleSheet, Modal, Pressable, FlatList, KeyboardAvoidingView, Platform, Image } from "react-native"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
@@ -28,7 +19,7 @@ export default function SignUpScreen({ navigation }: Props) {
   const [roleOpen, setRoleOpen] = useState(false)
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
-  const [showPass, setShowPass] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const onSignUp = () => {
     if (password !== confirm) {
@@ -36,16 +27,17 @@ export default function SignUpScreen({ navigation }: Props) {
       return
     }
     alert(`Signed up as ${name} (${role ?? "Role not set"})`)
+    ;(navigation as any).replace("SignIn")
   }
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.container}>
         <Pressable accessibilityRole="button" onPress={() => navigation.goBack()} style={styles.back}>
-          <RNText style={styles.backText}>{"←"}</RNText>
+          <Image style={styles.backIcon} source={require("../../assets/icon/back.png")} resizeMode="contain"/>
         </Pressable>
 
-        <RNText style={styles.title}>Create Your Account</RNText>
+        <Text style={styles.title}>Create Your Account</Text>
 
         <FormField label="Full Name" value={name} onChangeText={setName} placeholder="Your full name" />
 
@@ -55,31 +47,31 @@ export default function SignUpScreen({ navigation }: Props) {
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
-          placeholder="you@domain.com"
+          placeholder="email@domain.com"
         />
 
         {/* Role dropdown */}
         <Pressable onPress={() => setRoleOpen(true)} style={{ marginBottom: 14 }} accessibilityRole="button">
-          <RNText style={styles.label}>Role</RNText>
+          <Text style={styles.label}>Role</Text>
           <View style={styles.dropdown}>
-            <RNText style={styles.dropdownText}>{role ?? "Select a role"}</RNText>
-            <RNText style={styles.chev}>⌄</RNText>
+            <Text style={styles.dropdownText}>{role ?? "Select a role"}</Text>
+            <Image style={styles.dropdownIcon} source={require("../../assets/icon/dropdown.png")} resizeMode="contain"/>
           </View>
         </Pressable>
 
         <FormField
           label="Password"
-          secureTextEntry={!showPass}
+          secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
           placeholder="Create a password"
-          rightAdornment={<RNText style={{ fontSize: 16, color: colors.brandGreen }}>{showPass ? "🙈" : "👁"}</RNText>}
-          onPressRightAdornment={() => setShowPass((s) => !s)}
+          rightAdornment={<Image style={styles.icon} source={showPassword ? require("../../assets/icon/eye-alt.png") : require("../../assets/icon/eye-slash.png")} resizeMode="contain"/>}
+          onPressRightAdornment={() => setShowPassword((s) => !s)}
         />
 
         <FormField
           label="Confirm Password"
-          secureTextEntry={!showPass}
+          secureTextEntry={!showPassword}
           value={confirm}
           onChangeText={setConfirm}
           placeholder="Repeat your password"
@@ -87,12 +79,12 @@ export default function SignUpScreen({ navigation }: Props) {
 
         <Button title="SIGN UP" onPress={onSignUp} style={{ marginTop: 8 }} />
 
-        <RNText style={styles.footer}>
+        <Text style={styles.footer}>
           Already have an account?{" "}
-          <RNText style={styles.link} onPress={() => navigation.navigate("SignIn")}>
+          <Text style={styles.link} onPress={() => navigation.navigate("SignIn")}>
             Sign in here
-          </RNText>
-        </RNText>
+          </Text>
+        </Text>
 
         {/* Role modal */}
         <Modal visible={roleOpen} transparent animationType="fade" onRequestClose={() => setRoleOpen(false)}>
@@ -111,7 +103,7 @@ export default function SignUpScreen({ navigation }: Props) {
                   }}
                   style={styles.option}
                 >
-                  <RNText style={styles.optionText}>{item}</RNText>
+                  <Text style={styles.optionText}>{item}</Text>
                 </Pressable>
               )}
             />
@@ -123,12 +115,13 @@ export default function SignUpScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.brandMint },
+  root: { flex: 1, backgroundColor: colors.white },
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 12 },
   back: { paddingVertical: 8, paddingHorizontal: 4 },
-  backText: { fontSize: 20, color: colors.brandGreen },
-  title: { fontSize: 24, fontWeight: "800", color: colors.text, marginTop: 4, marginBottom: 16 },
-  label: { fontSize: 16, fontWeight: "600", color: colors.text, marginBottom: 8 },
+  backIcon: { width: 18, height: 18, tintColor: colors.brandBorder, marginBottom: 4 },
+  title: { fontFamily: "Fredoka-SemiBold", fontSize: 24, color: colors.textBlack, marginTop: 4, marginBottom: 16 },
+  icon: { width: 20, height: 20, tintColor: colors.brandBorder, marginRight: 6 },
+  label: { fontFamily: "Jost", fontSize: 16, color: colors.textBlack, marginBottom: 8 },
   dropdown: {
     height: 48,
     borderRadius: 10,
@@ -140,10 +133,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  dropdownText: { color: colors.text, fontSize: 16, opacity: 0.9 },
-  chev: { color: colors.brandGreen, fontSize: 18 },
-  footer: { marginTop: 16, textAlign: "center", color: colors.text },
-  link: { color: colors.text, textDecorationLine: "underline", fontWeight: "600" },
+  dropdownText: { color: colors.brandBorder, fontFamily: "Jost", fontSize: 16, opacity: 0.9 },
+  dropdownIcon: { width: 15, height: 15, tintColor: colors.brandBorder, marginRight: 4 },
+  footer: { fontFamily: "Jost", fontSize: 14, fontWeight: "400", marginTop: 16, textAlign: "center", color: colors.textBlack },
+  link: { fontFamily: "Jost-SemiBold", fontSize: 14, color: colors.textBlack, textDecorationLine: "underline" },
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.25)" },
   modalSheet: {
     position: "absolute",
@@ -161,5 +154,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#e5e5e5",
   },
-  optionText: { fontSize: 16, color: colors.text },
+  optionText: { fontSize: 16, color: colors.textBlack },
 })

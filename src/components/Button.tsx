@@ -33,5 +33,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  text: { color: colors.white, fontWeight: "800", fontSize: 18, letterSpacing: 1 },
+  text: { color: colors.white, fontFamily: "Fredoka-SemiBold", fontSize: 20, letterSpacing: 1 },
 })

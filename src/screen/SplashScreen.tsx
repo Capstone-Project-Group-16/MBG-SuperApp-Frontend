@@ -19,7 +19,7 @@ export default function SplashScreen({ navigation }: Props) {
     <View style={styles.container}>
       <View style={styles.phone}>
         <Image
-          source={require("../../assets/logo/Logo.png")}
+          source={require("../../assets/logo/logo.png")}
           style={styles.logo}
           resizeMode="contain"
           accessibilityIgnoresInvertColors
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 28,
     borderWidth: 2,
-    borderColor: "#0A0A0A",
+    borderColor: colors.brandMint,
     backgroundColor: colors.brandMint,
     alignItems: "center",
     justifyContent: "center",

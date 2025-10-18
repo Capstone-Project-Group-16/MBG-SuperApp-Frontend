@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, Pressable, Alert, KeyboardAvoidingView, Platform } from "react-native"
+import { View, Text, StyleSheet, Pressable, Alert, KeyboardAvoidingView, Platform, Image } from "react-native"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
@@ -18,6 +18,7 @@ export default function SignInScreen({ navigation }: Props) {
 
   const onSignIn = () => {
     Alert.alert("Signed In", `Email: ${email}`)
+    ;(navigation as any).replace("Home")
   }
 
   return (
@@ -35,7 +36,7 @@ export default function SignInScreen({ navigation }: Props) {
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
-          placeholder="you@domain.com"
+          placeholder="email@domain.com"
         />
 
         <FormField
@@ -44,7 +45,7 @@ export default function SignInScreen({ navigation }: Props) {
           value={password}
           onChangeText={setPassword}
           placeholder="Your password"
-          rightAdornment={<Text style={{ fontSize: 16, color: colors.brandGreen }}>{showPassword ? "🙈" : "👁"}</Text>}
+          rightAdornment={<Image style={styles.icon} source={showPassword ? require("../../assets/icon/eye-alt.png") : require("../../assets/icon/eye-slash.png")} resizeMode="contain"/>}
           onPressRightAdornment={() => setShowPassword((s) => !s)}
         />
 
@@ -70,12 +71,13 @@ export default function SignInScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.brandMint },
+  root: { flex: 1, backgroundColor: colors.white },
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 28 },
   headerRow: { marginBottom: 24, flexDirection: "row", alignItems: "center", gap: 8 },
-  title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 20 },
+  title: { fontFamily: "Fredoka-SemiBold", fontSize: 24, color: colors.textBlack, marginBottom: 20 },
+  icon: { width: 20, height: 20, tintColor: colors.brandBorder, marginRight: 6 },
   forgot: { alignSelf: "flex-start", marginTop: 6, marginBottom: 10 },
-  forgotText: { textDecorationLine: "underline", color: colors.text },
-  footer: { marginTop: 16, textAlign: "center", color: colors.text },
-  link: { color: colors.text, textDecorationLine: "underline", fontWeight: "600" },
+  forgotText: { fontFamily: "Jost", fontSize: 14, fontWeight: "400", textDecorationLine: "underline", color: colors.textBlack, marginBottom: 6 },
+  footer: { fontFamily: "Jost", fontSize: 14, fontWeight: "400", marginTop: 16, textAlign: "center", color: colors.textBlack },
+  link: { fontFamily: "Jost-SemiBold", fontSize: 14, color: colors.textBlack, textDecorationLine: "underline" },
 })
