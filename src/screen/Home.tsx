@@ -32,7 +32,7 @@ export default function HomeScreen({ navigation }: Props) {
           title="Food Customizer"
           description="Pilih menu makan siangmu sendiri. Seru kayak main game!"
           icon={require("../../assets/icon/food-customizer.png")}
-          onPress={() => {}}
+          onPress={() => navigation.navigate("FoodCustomizer")}
         />
         <View style={{ height: 24 }} />
         <FeatureCard
@@ -77,9 +77,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginTop: 10,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 22,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 16,
   },
   avatar: {
     width: 40,

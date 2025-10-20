@@ -25,7 +25,7 @@ export default function SignInScreen({ navigation }: Props) {
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.container}>
         <View style={styles.headerRow}>
-          <Logo showIcon />
+          <Logo/>
         </View>
 
         <Text style={styles.title}>Sign in Your Account</Text>
