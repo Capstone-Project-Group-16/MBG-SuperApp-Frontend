@@ -40,7 +40,7 @@ export default function BottomNav() {
         />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("/deliveryStatus")}>
+      <TouchableOpacity onPress={() => router.push("/deliveryProgress")}>
         <Image
           source={require("../assets/images/delivery-status.png")}
           style={{ width: 30, height: 30 }}

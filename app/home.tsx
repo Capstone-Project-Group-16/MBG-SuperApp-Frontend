@@ -5,7 +5,7 @@ import { Image, Text } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import styled from "styled-components/native";
 
-// --- Styled Components ---
+// styled components
 const Container = styled.ScrollView`
   flex: 1;
   background-color: white;
