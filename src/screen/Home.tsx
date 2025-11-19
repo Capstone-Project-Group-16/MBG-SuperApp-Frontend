@@ -1,6 +1,8 @@
 "use client"
 
 import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native"
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
@@ -34,28 +36,28 @@ export default function HomeScreen({ navigation }: Props) {
           icon={require("../../assets/icon/food-customizer.png")}
           onPress={() => navigation.navigate("FoodCustomizer")}
         />
-        <View style={{ height: 24 }} />
+        <View style={{ height: hp("3%") }} />
         <FeatureCard
           title="Nutrition Analysis"
           description="Scan makananmu, lihat kekuatan nutrisi di baliknya!"
           icon={require("../../assets/icon/nutrition-analysis.png")}
-          onPress={() => {}}
+          onPress={() => navigation.navigate("FoodScanner", { scanMode: "nutrition" })}
         />
-        <View style={{ height: 24 }} />
+        <View style={{ height: hp("3%") }} />
         <FeatureCard
           title="Food Waste"
           description="Foto piringmu, lihat seberapa jago kamu ngabisin makan!"
           icon={require("../../assets/icon/food-waste.png")}
-          onPress={() => {}}
+          onPress={() => navigation.navigate("FoodScanner", { scanMode: "waste" })}
         />
-        <View style={{ height: 24 }} />
+        <View style={{ height: hp("3%") }} />
         <FeatureCard
           title="MBG Quiz"
           description="Siap-siap! Quiz ini bakal bikin kamu cerdas pilih makanan."
           icon={require("../../assets/icon/mbg-quiz.png")}
-          onPress={() => {}}
+          onPress={() => navigation.navigate("MBGQuiz")}
         />
-        <View style={{ height: 80 }} />
+        <View style={{ height: hp("10%") }} />
       </ScrollView>
 
       <NavBar
@@ -75,23 +77,23 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginTop: 10,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 16,
+    gap: wp("2.5%"),
+    marginTop: hp("1.25%"),
+    paddingHorizontal: wp("4%"),
+    paddingTop: hp("4%"),
+    paddingBottom: hp("2%"),
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 24,
+    width: wp("10%"),
+    height: wp("10%"),
+    borderRadius: wp("5%"),
     backgroundColor: colors.white,
     borderWidth: 2,
     borderColor: colors.brandBorder,
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarLetter: { fontFamily: "Fredoka-SemiBold", fontSize: 16, color: colors.brandGreen },
-  userName: { fontFamily: "Fredoka-SemiBold", fontSize: 18, color: colors.textBlack, letterSpacing: 0.5 },
-  content: { paddingHorizontal: 16, paddingTop: 10 },
+  avatarLetter: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(16), color: colors.brandGreen },
+  userName: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(18), color: colors.textBlack, letterSpacing: 0.5 },
+  content: { paddingHorizontal: wp("4%"), paddingTop: hp("1.25%") },
 })

@@ -1,4 +1,6 @@
 import { View, Text, StyleSheet, ImageSourcePropType, Image } from "react-native"
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import { colors } from "../theme/Color"
 
 type Item = { 
@@ -25,15 +27,15 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    gap: wp("3.5%"),
+    paddingHorizontal: wp("3%"),
+    paddingVertical: hp("1%"),
     backgroundColor: colors.white,
     borderWidth: 2,
     borderColor: colors.brandBorder,
-    borderRadius: 24,
+    borderRadius: wp("6%"),
   },
-  item: { flexDirection: "row", alignItems: "center", gap: 6 },
-  icon: { width: 20, height: 20, borderRadius: 6 },
-  text: { fontFamily: "Fredoka-Medium", fontSize: 16, color: colors.textBlack },
+  item: { flexDirection: "row", alignItems: "center", gap: wp("1.5%") },
+  icon: { width: wp("5%"), height: wp("5%"), borderRadius: wp("1.5%") },
+  text: { fontFamily: "Fredoka-Medium", fontSize: RFValue(14), color: colors.textBlack },
 })

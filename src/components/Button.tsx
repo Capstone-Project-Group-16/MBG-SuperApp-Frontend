@@ -1,4 +1,6 @@
 import { Pressable, Text, StyleSheet, type ViewStyle } from "react-native"
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import { colors } from "../theme/Color"
 
 export default function Button({
@@ -27,11 +29,11 @@ export default function Button({
 
 const styles = StyleSheet.create({
   btn: {
-    height: 56,
-    borderRadius: 28,
+    height: hp("7%"),
+    borderRadius: hp("3.5%"),
     backgroundColor: colors.brandGreen,
     alignItems: "center",
     justifyContent: "center",
   },
-  text: { color: colors.white, fontFamily: "Fredoka-SemiBold", fontSize: 20, letterSpacing: 1 },
+  text: { color: colors.white, fontFamily: "Fredoka-SemiBold", fontSize: RFValue(18), letterSpacing: 1 },
 })

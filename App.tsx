@@ -7,14 +7,26 @@ import SignIn from "./src/screen/SignIn"
 import SignUp from "./src/screen/SignUp"
 import Home from "./src/screen/Home"
 import FoodCustomizer from "./src/screen/FoodCustomizer"
+import FoodOrder from "./src/screen/FoodOrder"
+import FoodScanner from "./src/screen/FoodScanner";
+import NutritionAnalysis from "./src/screen/NutritionAnalysis";
+import FoodWaste from "./src/screen/FoodWaste";
+import MBGQuiz from "./src/screen/MBGQuiz";
+import QuizResult from "./src/screen/QuizResult"; 
 import "react-native-gesture-handler";
 
 export type RootStackParamList = {
-  Splash: undefined
+  SplashScreen: undefined
   SignIn: undefined
   SignUp: undefined
   Home: undefined
   FoodCustomizer: undefined
+  FoodOrder: { selectedItems: string[]}
+  FoodScanner: { scanMode?: "nutrition" | "waste" }
+  NutritionAnalysis: undefined
+  FoodWaste: undefined
+  MBGQuiz: undefined
+  QuizResult: { score: number; correct: number; incorrect: number; xp: number; gems: number }
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -54,11 +66,17 @@ export default function App() {
           animation: "fade",
         }}
       >
-        <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="SplashScreen" component={SplashScreen} />
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="FoodCustomizer" component={FoodCustomizer} />
+        <Stack.Screen name="FoodOrder" component={FoodOrder} />
+        <Stack.Screen name="FoodScanner" component={FoodScanner} />
+        <Stack.Screen name="NutritionAnalysis" component={NutritionAnalysis} />
+        <Stack.Screen name="FoodWaste" component={FoodWaste} />
+        <Stack.Screen name="MBGQuiz" component={MBGQuiz} />
+        <Stack.Screen name="QuizResult" component={QuizResult} />
       </Stack.Navigator>
     </NavigationContainer>
   )

@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { View, Text, StyleSheet, Pressable, Alert, KeyboardAvoidingView, Platform, Image } from "react-native"
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
@@ -49,15 +51,17 @@ export default function SignInScreen({ navigation }: Props) {
           onPressRightAdornment={() => setShowPassword((s) => !s)}
         />
 
+        {/* 
         <Pressable
           onPress={() => Alert.alert("Forgot Password", "Implement your reset flow")}
           accessibilityRole="button"
           style={styles.forgot}
         >
           <Text style={styles.forgotText}>Forgot password?</Text>
-        </Pressable>
+        </Pressable> 
+        */}
 
-        <Button title="SIGN IN" onPress={onSignIn} style={{ marginTop: 8 }} />
+        <Button title="SIGN IN" onPress={onSignIn} style={{ marginTop: hp("1%") }} />
 
         <Text style={styles.footer}>
           {"Don't have an account? "}
@@ -72,12 +76,12 @@ export default function SignInScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
-  container: { flex: 1, paddingHorizontal: 20, paddingTop: 28 },
-  headerRow: { marginBottom: 24, flexDirection: "row", alignItems: "center", gap: 8 },
-  title: { fontFamily: "Fredoka-SemiBold", fontSize: 24, color: colors.textBlack, marginBottom: 20 },
-  icon: { width: 20, height: 20, tintColor: colors.brandBorder, marginRight: 6 },
-  forgot: { alignSelf: "flex-start", marginTop: 6, marginBottom: 10 },
-  forgotText: { fontFamily: "Jost", fontSize: 14, fontWeight: "400", textDecorationLine: "underline", color: colors.textBlack, marginBottom: 6 },
-  footer: { fontFamily: "Jost", fontSize: 14, fontWeight: "400", marginTop: 16, textAlign: "center", color: colors.textBlack },
-  link: { fontFamily: "Jost-SemiBold", fontSize: 14, color: colors.textBlack, textDecorationLine: "underline" },
+  container: { flex: 1, paddingHorizontal: wp("5%"), paddingTop: hp("6%") },
+  headerRow: { marginBottom: hp("2%"), flexDirection: "row", alignItems: "center", gap: wp("2%") },
+  title: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(22), color: colors.textBlack, marginBottom: hp("2.5%") },
+  icon: { width: wp("5%"), height: wp("5%"), tintColor: colors.brandBorder, marginRight: wp("1.5%") },
+  forgot: { alignSelf: "flex-start", marginTop: hp("0.75%"), marginBottom: hp("1.25%") },
+  forgotText: { fontFamily: "Jost", fontSize: RFValue(14), fontWeight: "400", textDecorationLine: "underline", color: colors.textBlack, marginBottom: hp("0.75%") },
+  footer: { fontFamily: "Jost", fontSize: RFValue(12), marginTop: hp("2%"), textAlign: "center", color: colors.textBlack },
+  link: { fontFamily: "Jost-SemiBold", fontSize: RFValue(12), color: colors.textBlack, textDecorationLine: "underline" },
 })

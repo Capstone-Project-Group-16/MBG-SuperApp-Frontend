@@ -1,4 +1,6 @@
 import { View, Text, StyleSheet, Image } from "react-native"
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import { colors } from "../theme/Color"
 
 export default function Logo() {
@@ -17,8 +19,8 @@ export default function Logo() {
 }
 
 const styles = StyleSheet.create({
-  row: { flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8 },
-  icon: { width: 40, height: 40, marginRight: 0 },
-  mbg: { fontFamily: "Madimi-One", fontSize: 28, color: colors.brandOrange, letterSpacing: 0.5 },
-  superapp: { fontFamily: "Madimi-One", fontSize: 28, color: colors.brandGreen, letterSpacing: 0.5 },
+  row: { flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: wp("2%") },
+  icon: { width: wp("10%"), height: wp("10%"), marginRight: 0 },
+  mbg: { fontFamily: "Madimi-One", fontSize: RFValue(28), color: colors.brandOrange, letterSpacing: 0.5 },
+  superapp: { fontFamily: "Madimi-One", fontSize: RFValue(28), color: colors.brandGreen, letterSpacing: 0.5 },
 })

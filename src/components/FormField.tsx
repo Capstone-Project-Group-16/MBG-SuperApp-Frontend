@@ -1,5 +1,7 @@
 import type React from "react"
 import { View, Text, TextInput, StyleSheet, type TextInputProps, Pressable } from "react-native"
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import { colors } from "../theme/Color"
 
 type FormFieldProps = TextInputProps & {
@@ -31,19 +33,19 @@ export function FormField({ label, rightAdornment, onPressRightAdornment, style,
 }
 
 const styles = StyleSheet.create({
-  wrap: { marginBottom: 14 },
-  label: { fontFamily: "Jost", fontSize: 16, fontWeight: "400", color: colors.textBlack, marginBottom: 8 },
+  wrap: { marginBottom: hp("1.75%") },
+  label: { fontFamily: "Jost", fontSize: RFValue(14), color: colors.textBlack, marginBottom: hp("1%") },
   inputWrap: { position: "relative" },
   input: {
-    height: 48,
-    borderRadius: 10,
+    height: hp("6%"),
+    borderRadius: wp("2.5%"),
     borderWidth: 2,
     borderColor: colors.brandBorder,
     backgroundColor: colors.brandMint,
-    paddingHorizontal: 14,
+    paddingHorizontal: wp("3.5%"),
     color: colors.textBlack,
     fontFamily: "Jost",
-    fontSize: 16,
+    fontSize: RFValue(14),
   },
-  adornment: { position: "absolute", right: 12, top: 0, bottom: 0, justifyContent: "center", alignItems: "center" },
+  adornment: { position: "absolute", right: wp("3%"), top: 0, bottom: 0, justifyContent: "center", alignItems: "center" },
 })

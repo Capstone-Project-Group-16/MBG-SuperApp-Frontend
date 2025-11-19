@@ -1,7 +1,9 @@
 "use client"
 
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, FlatList, ImageBackground, Image, Dimensions } from "react-native"
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, FlatList, ImageBackground, Image } from "react-native"
 import { useState } from "react"
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
@@ -36,15 +38,15 @@ const FOOD_ITEMS = [
 
 export default function FoodCustomizer({ navigation }: Props) {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
-  const screenWidth = Dimensions.get("window").width
 
   const toggleItem = (id: string) => {
     setSelectedItems((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]))
   }
 
   const handleMakeFood = () => {
-    console.log("[v0] Selected items:", selectedItems)
-    // TODO: Navigate to result screen or show confirmation
+    if (selectedItems.length > 0) {
+      navigation.navigate("FoodOrder", { selectedItems })
+    }
   }
 
   return (
@@ -70,7 +72,7 @@ export default function FoodCustomizer({ navigation }: Props) {
         <View style={styles.refrigeratorWrapper}>
           <ImageBackground
             source={require("../../assets/icon/refrigerator.png")}
-            style={[styles.refrigeratorContainer, { width: screenWidth * 0.9 }]}
+            style={styles.refrigeratorContainer}
             imageStyle={styles.refrigeratorImage}
             resizeMode="contain"
           >
@@ -100,7 +102,7 @@ export default function FoodCustomizer({ navigation }: Props) {
           <Button title="MAKE FOOD" onPress={handleMakeFood} />
         </View>
         
-        <View style={{ height: 20 }} />
+        <View style={{ height: hp("2.5%") }} />
       </ScrollView>
     </SafeAreaView>
   )
@@ -111,23 +113,24 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    marginTop: 10,
+    gap: wp("2.5%"),
+    paddingHorizontal: wp("4%"),
+    paddingTop: hp("4%"),
+    marginTop: hp("1.25%"),
   },
-  scrollContent: { paddingBottom: 20 },
-  refrigeratorWrapper: { alignItems: "center", marginTop: -4 },
+  scrollContent: { paddingBottom: hp("2.5%") },
+  refrigeratorWrapper: { alignItems: "center", marginTop: hp("-0.5%") },
   refrigeratorContainer: { 
+    width: wp("85%"),
     aspectRatio: 0.5,
-    borderRadius: 16, 
+    borderRadius: wp("4%"), 
     overflow: "hidden", 
-    paddingVertical: Dimensions.get("window").height * 0.133, 
-    paddingHorizontal: Dimensions.get("window").width * 0.03,
+    paddingVertical: hp("11.45%"), 
+    paddingHorizontal: wp("3%"),
     justifyContent: "center",
   },
-  refrigeratorImage: { borderRadius: 16 },
+  refrigeratorImage: { borderRadius: wp("4%") },
   gridContainer: { flex: 1 },
-  gridRow: { justifyContent: "center", marginBottom: Dimensions.get("window").width * 0.0282 },
-  buttonContainer: { paddingHorizontal: 16, marginTop: -4, marginBottom: -8 },
+  gridRow: { justifyContent: "center", marginBottom: wp("2.82%") },
+  buttonContainer: { paddingHorizontal: wp("4%"), marginTop: hp("-0.2%"), marginBottom: hp("-1%") },
 })

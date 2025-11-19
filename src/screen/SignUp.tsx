@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { View, Text, StyleSheet, Modal, Pressable, FlatList, KeyboardAvoidingView, Platform, Image } from "react-native"
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
@@ -51,7 +53,7 @@ export default function SignUpScreen({ navigation }: Props) {
         />
 
         {/* Role dropdown */}
-        <Pressable onPress={() => setRoleOpen(true)} style={{ marginBottom: 14 }} accessibilityRole="button">
+        <Pressable onPress={() => setRoleOpen(true)} style={{ marginBottom: hp("1.75%") }} accessibilityRole="button">
           <Text style={styles.label}>Role</Text>
           <View style={styles.dropdown}>
             <Text style={styles.dropdownText}>{role ?? "Select a role"}</Text>
@@ -77,7 +79,7 @@ export default function SignUpScreen({ navigation }: Props) {
           placeholder="Repeat your password"
         />
 
-        <Button title="SIGN UP" onPress={onSignUp} style={{ marginTop: 8 }} />
+        <Button title="SIGN UP" onPress={onSignUp} style={{ marginTop: hp("1%") }} />
 
         <Text style={styles.footer}>
           Already have an account?{" "}
@@ -116,27 +118,27 @@ export default function SignUpScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
-  container: { flex: 1, paddingHorizontal: 20, paddingTop: 12 },
-  back: { paddingVertical: 8, paddingHorizontal: 4 },
-  backIcon: { width: 18, height: 18, tintColor: colors.brandBorder, marginBottom: 4 },
-  title: { fontFamily: "Fredoka-SemiBold", fontSize: 24, color: colors.textBlack, marginTop: 4, marginBottom: 16 },
-  icon: { width: 20, height: 20, tintColor: colors.brandBorder, marginRight: 6 },
-  label: { fontFamily: "Jost", fontSize: 16, color: colors.textBlack, marginBottom: 8 },
+  container: { flex: 1, paddingHorizontal: wp("5%"), paddingTop: hp("4%") },
+  back: { paddingVertical: hp("1%"), paddingHorizontal: wp("1%") },
+  backIcon: { width: wp("6%"), height: wp("6%"), tintColor: colors.brandBorder, marginBottom: hp("0.5%") },
+  title: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(22), color: colors.textBlack, marginTop: hp("0.5%"), marginBottom: hp("2%") },
+  icon: { width: wp("5%"), height: wp("5%"), tintColor: colors.brandBorder, marginRight: wp("1.5%") },
+  label: { fontFamily: "Jost", fontSize: RFValue(14), color: colors.textBlack, marginBottom: hp("1%") },
   dropdown: {
-    height: 48,
-    borderRadius: 10,
+    height: hp("6%"),
+    borderRadius: wp("2.5%"),
     borderWidth: 2,
     borderColor: colors.brandBorder,
     backgroundColor: colors.brandMint,
-    paddingHorizontal: 14,
+    paddingHorizontal: wp("3.5%"),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  dropdownText: { color: colors.brandBorder, fontFamily: "Jost", fontSize: 16, opacity: 0.9 },
-  dropdownIcon: { width: 15, height: 15, tintColor: colors.brandBorder, marginRight: 4 },
-  footer: { fontFamily: "Jost", fontSize: 14, fontWeight: "400", marginTop: 16, textAlign: "center", color: colors.textBlack },
-  link: { fontFamily: "Jost-SemiBold", fontSize: 14, color: colors.textBlack, textDecorationLine: "underline" },
+  dropdownText: { color: colors.brandBorder, fontFamily: "Jost", fontSize: RFValue(14), opacity: 0.9 },
+  dropdownIcon: { width: wp("3.75%"), height: wp("3.75%"), tintColor: colors.brandBorder, marginRight: wp("1%") },
+  footer: { fontFamily: "Jost", fontSize: RFValue(12), marginTop: hp("2%"), textAlign: "center", color: colors.textBlack },
+  link: { fontFamily: "Jost-SemiBold", fontSize: RFValue(12), color: colors.textBlack, textDecorationLine: "underline" },
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.25)" },
   modalSheet: {
     position: "absolute",
@@ -144,15 +146,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: colors.white,
-    paddingBottom: 24,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    paddingBottom: hp("3%"),
+    borderTopLeftRadius: wp("4%"),
+    borderTopRightRadius: wp("4%"),
   },
   option: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: hp("2%"),
+    paddingHorizontal: wp("5%"),
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#e5e5e5",
   },
-  optionText: { fontSize: 16, color: colors.textBlack },
+  optionText: { fontSize: RFValue(16), color: colors.textBlack },
 })

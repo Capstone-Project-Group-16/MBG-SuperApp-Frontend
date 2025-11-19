@@ -1,4 +1,6 @@
 import { View, Text, StyleSheet, Pressable, type ViewStyle, ImageSourcePropType, Image } from "react-native"
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import { colors } from "../theme/Color"
 
 type Props = {
@@ -26,22 +28,22 @@ export default function FeatureCard({ title, description, icon, onPress, style }
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
-    padding: 18,
-    paddingBottom: 18,
-    borderRadius: 30,
+    padding: wp("4.5%"),
+    paddingBottom: wp("5%"),
+    borderRadius: wp("8%"),
     borderWidth: 2,
     borderColor: colors.brandBorder,
     backgroundColor: colors.brandMint,
-    gap: 12,
+    gap: wp("3%"),
     shadowColor: colors.brandGreen,
     shadowOpacity: 0.05,
     shadowRadius: 6,
     shadowOffset: { width: 2, height: 2 },
     elevation: 6,
   },
-  leftIconContainer: { width: 64, height: 64, borderRadius: 14, borderWidth: 2, borderColor: colors.brandMint, backgroundColor: colors.brandMint, marginRight: 4 },
-  leftIconImage: { width: 64, height: 64, alignSelf: "center" },
+  leftIconContainer: { width: wp("18%"), height: wp("18%"), borderRadius: wp("3.5%"), borderWidth: 2, borderColor: colors.brandMint, backgroundColor: colors.brandMint, marginRight: wp("1%") },
+  leftIconImage: { width: wp("18%"), height: wp("18%"), alignSelf: "center" },
   textCol: { flex: 1 },
-  title: { fontFamily: "Fredoka-SemiBold", fontSize: 18, color: colors.textBlack, marginBottom: 6, letterSpacing: 0.5 },
-  desc: { fontFamily: "Jost", fontSize: 14, color: colors.textBlack, opacity: 0.9, lineHeight: 18 },
+  title: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(16), color: colors.textBlack, marginBottom: hp("0.75%"), letterSpacing: 0.5 },
+  desc: { fontFamily: "Jost", fontSize: RFValue(14), color: colors.textBlack, opacity: 0.9, lineHeight: 22 },
 })
