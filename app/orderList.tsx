@@ -1,11 +1,23 @@
+import { useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import React, { useState } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function OrderList() {
-  const [viewLevel, setViewLevel] = useState<"school" | "class" | "student">("school");
-  const [selectedSchool, setSelectedSchool] = useState<any>(null);
+  const params = useLocalSearchParams();
+  const initialLevel = params.viewLevel as "school" | "class" | "student" | undefined;
+  const initialSchoolName = params.schoolName as string | undefined;
+
+  const [viewLevel, setViewLevel] = useState<"school" | "class" | "student">(
+    initialLevel ?? "school"
+  );
+  const [selectedSchool, setSelectedSchool] = useState<any>(
+    initialSchoolName
+      ? { name: initialSchoolName } // ⬅ pasang otomatis
+      : null
+  );
   const [selectedClass, setSelectedClass] = useState<any>(null);
+
 
   // Dummy data
   const schools = [

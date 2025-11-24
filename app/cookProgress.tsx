@@ -235,7 +235,14 @@ const ArrowText = styled.Text`
               </SchoolDetail>
             </InfoContainer>
 
-            <ArrowButton onPress={() => router.push("/orderList")}>
+            <ArrowButton onPress={() => router.push({
+              pathname: "/orderList",
+              params: {
+                viewLevel: "class",
+                schoolName: school.name,
+              },
+            }
+            )}>
               <ArrowText>{">"}</ArrowText>
             </ArrowButton>
           </Card>
