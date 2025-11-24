@@ -9,14 +9,22 @@ import { Image } from "react-native";
 import styled from "styled-components/native";
 
 // styled components
-const Container = styled.ScrollView`
+const Container = styled.ScrollView.attrs({
+  contentContainerStyle: {
+    paddingBottom: 100,
+  },
+})`
   flex: 1;
   background-color: white;
   padding: 20px;
 `;
 
+const ScrollArea = styled.ScrollView`
+  flex: 1;
+`;
+
 const Title = styled.Text`
-  font-family: "Fredoka";
+  font-family: "Fredoka-Regular";
   font-size: 26px;
   font-weight: 700;
   text-align: center;
@@ -24,7 +32,7 @@ const Title = styled.Text`
 `;
 
 const EmptyText = styled.Text`
-  font-family: "Fredoka";
+  font-family: "Fredoka-Regular";
   font-size: 18px;
   text-align: center;
   color: black;
@@ -49,13 +57,13 @@ const StartButton = styled.TouchableOpacity`
 
 const StartText = styled.Text`
   color: white;
-  font-family: "Fredoka";
+  font-family: "Fredoka-Regular";
   font-size: 16px;
   font-weight: 700;
 `;
 
 const SectionTitle = styled.Text`
-  font-family: "Fredoka";
+  font-family: "Fredoka-Regular";
   font-size: 18px;
   font-weight: 700;
   margin-top: 25px;
@@ -72,7 +80,7 @@ const DeliveryCard = styled.TouchableOpacity`
 `;
 
 const DeliveryText = styled.Text`
-  font-family: "Fredoka";
+  font-family: "Fredoka-Regular";
   font-size: 16px;
   font-weight: 700;
 `;
@@ -87,21 +95,29 @@ const StatusText = styled.Text`
 const DeliveryList = () => {
   const router = useRouter();
 
-  // sementara pakai dummy data
-  const [deliveries, setDeliveries] = useState([
-    {
-      id: 1,
-      school: "SMAN 1 DEPOK",
-      status: "Food being delivered",
-      time: "10:30 AM",
-      ongoing: true,
-    },
-  ]);
+  const [deliveries, setDeliveries] = useState<any[]>([]);
+
+  // useEffect(() => {
+  //   const fetchDeliveries = async () => {
+  //     try {
+  //       // const response = await fetch("(API)");
+  //       // const data = await response.json();
+  //       // setDeliveries(data);
+
+  //       console.log("Fetching delivery data from backend...");
+  //     } catch (error) {
+  //       console.log("Error fetching deliveries:", error);
+  //     }
+  //   };
+
+  //   fetchDeliveries();
+  // }, []);
 
   const hasDeliveries = deliveries.length > 0;
 
   return (
     <Container>
+      <ScrollArea showsVerticalScrollIndicator={false}>
       <Title>Delivery Progress</Title>
 
       {!hasDeliveries ? (
@@ -152,6 +168,8 @@ const DeliveryList = () => {
             ))}
         </>
       )}
+      </ScrollArea>
+
       <BottomNav />
     </Container>
   );

@@ -42,7 +42,7 @@ const ProfileButton = styled.TouchableOpacity`
 `;
 
 const WelcomeText = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 28px;
   font-weight: 600;
   color: black;
@@ -51,7 +51,7 @@ const WelcomeText = styled.Text`
 `;
 
 const SectionTitle = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 18px;
   font-weight: 600;
   color: black;
@@ -75,7 +75,7 @@ const CardHeader = styled.View`
 `;
 
 const CardHeaderText = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 16px;
   font-weight: 600;
   color: black;
@@ -96,7 +96,7 @@ const StatBox = styled.View`
 `;
 
 const StatLabel = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 14px;
   font-weight: 500;
   text-align: center;
@@ -104,7 +104,7 @@ const StatLabel = styled.Text`
 `;
 
 const StatValue = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 16px;
   font-weight: 600;
   margin-top: 6px;
@@ -147,8 +147,7 @@ const Home: React.FC = () => {
   const [topIngredients, setTopIngredients] = useState<string[]>([]);
 
   useEffect(() => {
-    // nanti di sini panggil API, contoh:
-    // fetch("https://api.superapp.com/catering/dashboard")
+    // fetch("(API)")
     //   .then(res => res.json())
     //   .then(data => {
     //     setOrderCount(data.totalOrders);
@@ -205,7 +204,7 @@ const Home: React.FC = () => {
                 rotation={0}
               >
                 {() => (
-                  <Text style={{ fontFamily: "Fredoka", fontSize: 14, fontWeight: "600" }}>
+                  <Text style={{ fontFamily: "Fredoka-Regular", fontSize: 14, fontWeight: "600" }}>
                     {cookingPercent}%
                   </Text>
                 )}
@@ -213,7 +212,7 @@ const Home: React.FC = () => {
             ) : (
               // placeholder when no data
               <IngredientCircle>
-                <Text style={{ fontFamily: "Fredoka" }}>-</Text>
+                <Text style={{ fontFamily: "Fredoka-Regular" }}>-</Text>
               </IngredientCircle>
             )}
 

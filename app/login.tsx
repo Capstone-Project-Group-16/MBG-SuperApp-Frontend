@@ -1,12 +1,12 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Image,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function LoginScreen() {
@@ -15,7 +15,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    // langsung ke home page
     router.replace("/home");
   };
 
@@ -25,14 +24,12 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      {/* LOGO */}
       <Image
         source={require("@/assets/images/superapp-logo-name.png")}
         style={styles.logo}
         resizeMode="contain"
       />
 
-      {/* TITLE */}
       <Text style={styles.title}>Sign in Your Account</Text>
 
       {/* EMAIL */}

@@ -21,9 +21,9 @@ export default function OrderList() {
   ];
 
   const students = [
-    { id: 1, name: "Aulia Rahman", food: "Nasi Ayam Teriyaki", status: "Delivered" },
-    { id: 2, name: "Nadya Putri", food: "Nasi Ikan Fillet", status: "Pending" },
-    { id: 3, name: "Rafi Pratama", food: "Nasi Ayam Rica", status: "Delivered" },
+    { id: 1, name: "A", food: "Nasi Ayam Teriyaki", status: "Delivered" },
+    { id: 2, name: "B", food: "Nasi Ikan Fillet", status: "Pending" },
+    { id: 3, name: "C", food: "Nasi Ayam Rica", status: "Delivered" },
   ];
 
   const handleBack = () => {

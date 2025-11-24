@@ -18,7 +18,7 @@ const Container = styled.View`
 
 const Title = styled.Text`
   font-size: 26px;
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-weight: 600;
   color: black;
   margin-top: 10px;
@@ -26,7 +26,7 @@ const Title = styled.Text`
 
 const SectionLabel = styled.Text`
   font-size: 12px;
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-weight: 700;
   color: black;
   margin-bottom: 8px;
@@ -56,7 +56,7 @@ const StyledPicker = styled(Picker)`
 `;
 
 const InfoText = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 14px;
   color: black;
   margin-top: 5px;
@@ -74,7 +74,7 @@ const Option = styled.TouchableOpacity<{ isSelected: boolean }>`
 
 
 const OptionText = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 13px;
   color: black;
 `;
@@ -96,7 +96,7 @@ const TimeBox = styled.View`
 `;
 
 const TimeText = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 18px;
   color: black;
 `;
@@ -114,7 +114,7 @@ const StartButton = styled.TouchableOpacity`
 const StartText = styled.Text`
   color: white;
   font-size: 16px;
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-weight: 700;
 `;
 

@@ -47,14 +47,14 @@ const BackButton = styled.TouchableOpacity`
 `;
 
 const BackText = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 14px;
   color: #2f5d2b;
   font-weight: 600;
 `;
 
 const Title = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 26px;
   font-weight: 600;
   color: black;
@@ -73,7 +73,7 @@ const FilterContainer = styled.View`
 `;
 
 const FilterLabel = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 13px;
   font-weight: 700;
   color: black;
@@ -94,7 +94,7 @@ const PickerContainer = styled.View`
 
 const ResultLabel = styled.Text`
   width: 90%;
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 16px;
   font-weight: 600;
   color: black;
@@ -120,7 +120,7 @@ const ProgressContainer = styled.View`
 `;
 
 const ProgressText = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 14px;
   font-weight: 500;
   color: black;
@@ -132,14 +132,14 @@ const InfoContainer = styled.View`
 `;
 
 const SchoolName = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 18px;
   font-weight: 600;
   color: black;
 `;
 
 const SchoolDetail = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 14px;
   font-weight: 300;
   color: black;
@@ -156,7 +156,7 @@ const ArrowButton = styled.TouchableOpacity`
 `;
 
 const ArrowText = styled.Text`
-  font-family: Fredoka;
+  font-family: "Fredoka-Regular";
   font-size: 18px;
   font-weight: 700;
   color: #45a246;

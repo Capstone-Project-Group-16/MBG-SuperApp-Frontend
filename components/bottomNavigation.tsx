@@ -4,17 +4,22 @@ import { Image, TouchableOpacity } from "react-native";
 import styled from "styled-components/native";
 
 const Container = styled.View`
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
+
   background-color: #fff;
   padding: 15px 10px;
   border-top-width: 1px;
   border-top-color: #ddd;
-  position: absolute;
-  bottom: -30px;
-  left: 0;
-  right: 0;
+  
+  z-index : 9999;
   elevation: 10;
   shadow-color: #000;
   shadow-opacity: 0.1;
@@ -40,7 +45,7 @@ export default function BottomNav() {
         />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("/deliveryProgress")}>
+      <TouchableOpacity onPress={() => router.push("/deliveryList")}>
         <Image
           source={require("../assets/images/delivery-status.png")}
           style={{ width: 30, height: 30 }}
