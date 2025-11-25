@@ -42,7 +42,7 @@ const ProfileButton = styled.TouchableOpacity`
 `;
 
 const WelcomeText = styled.Text`
-  font-family: "Fredoka-Regular";
+  font-family: "Fredoka-Bold";
   font-size: 28px;
   font-weight: 600;
   color: black;
@@ -51,7 +51,7 @@ const WelcomeText = styled.Text`
 `;
 
 const SectionTitle = styled.Text`
-  font-family: "Fredoka-Regular";
+  font-family: "Fredoka-Medium";
   font-size: 18px;
   font-weight: 600;
   color: black;
@@ -75,7 +75,7 @@ const CardHeader = styled.View`
 `;
 
 const CardHeaderText = styled.Text`
-  font-family: "Fredoka-Regular";
+  font-family: "Fredoka-Medium";
   font-size: 16px;
   font-weight: 600;
   color: black;

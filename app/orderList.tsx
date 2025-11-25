@@ -1,29 +1,92 @@
+import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import React, { useState } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
+
+const FilterContainer = ({ children }: any) => (
+  <View
+    style={{
+      backgroundColor: "#C1E5C066",
+      padding: 12,
+      borderRadius: 12,
+      marginBottom: 12,
+      gap: 10,
+    }}
+  >
+    {children}
+  </View>
+);
+
+const PickerContainer = ({ children }: any) => (
+  <View
+    style={{
+      backgroundColor: "white",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: "#A5D6A7",
+      overflow: "hidden",
+    }}
+  >
+    {children}
+  </View>
+);
+
+// styled components
 export default function OrderList() {
   const params = useLocalSearchParams();
-  const initialLevel = params.viewLevel as "school" | "class" | "student" | undefined;
+  const initialLevel = params.viewLevel as
+    | "school"
+    | "class"
+    | "student"
+    | undefined;
   const initialSchoolName = params.schoolName as string | undefined;
 
-  const [viewLevel, setViewLevel] = useState<"school" | "class" | "student">(
-    initialLevel ?? "school"
-  );
+  const [selectedCity, setSelectedCity] = useState("All");
+  const [viewLevel, setViewLevel] = useState<
+    "school" | "class" | "student"
+  >(initialLevel ?? "school");
+
   const [selectedSchool, setSelectedSchool] = useState<any>(
-    initialSchoolName
-      ? { name: initialSchoolName } // ⬅ pasang otomatis
-      : null
+    initialSchoolName ? { name: initialSchoolName } : null
   );
   const [selectedClass, setSelectedClass] = useState<any>(null);
+  const [selectedStatus, setSelectedStatus] = useState("All");
 
+  const [filteredSchools, setFilteredSchools] = useState<any[]>([]);
+  const [filteredClasses, setFilteredClasses] = useState<any[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<any[]>([]);
 
   // Dummy data
   const schools = [
-    { id: 1, name: "SMAN 1 DEPOK", totalOrders: 320, status: "Incomplete" },
-    { id: 2, name: "SMAN 2 BEKASI", totalOrders: 275, status: "Complete" },
-    { id: 3, name: "SMPN 5 JAKARTA", totalOrders: 410, status: "Incomplete" },
+    {
+      id: 1,
+      name: "SMAN 1 DEPOK",
+      city: "Depok",
+      totalOrders: 320,
+      status: "Incomplete",
+    },
+    {
+      id: 2,
+      name: "SMAN 2 BEKASI",
+      city: "Bekasi",
+      totalOrders: 275,
+      status: "Complete",
+    },
+    {
+      id: 3,
+      name: "SMAN 5 JAKARTA",
+      city: "Jakarta",
+      totalOrders: 410,
+      status: "Incomplete",
+    },
   ];
 
   const classes = [
@@ -38,6 +101,7 @@ export default function OrderList() {
     { id: 3, name: "C", food: "Nasi Ayam Rica", status: "Delivered" },
   ];
 
+
   const handleBack = () => {
     if (viewLevel === "student") {
       setViewLevel("class");
@@ -46,6 +110,38 @@ export default function OrderList() {
       setViewLevel("school");
       setSelectedSchool(null);
     }
+  };
+
+  const applyFilters = () => {
+    const fSchools = schools.filter((item) => {
+      const matchCity = selectedCity === "All" || item.city === selectedCity;
+
+      const matchSchool =
+        selectedSchool === "All" ||
+        selectedSchool?.name === item.name ||
+        selectedSchool === null;
+
+      const matchStatus =
+        selectedStatus === "All" || item.status === selectedStatus;
+
+      return matchCity && matchSchool && matchStatus;
+    });
+
+    const fClasses = classes.filter((item) => {
+      const matchStatus =
+        selectedStatus === "All" || item.status === selectedStatus;
+      return matchStatus;
+    });
+
+    const fStudents = students.filter((item) => {
+      const matchStatus =
+        selectedStatus === "All" || item.status === selectedStatus;
+      return matchStatus;
+    });
+
+    setFilteredSchools(fSchools);
+    setFilteredClasses(fClasses);
+    setFilteredStudents(fStudents);
   };
 
   const renderItem = ({ item }: { item: any }) => {
@@ -63,14 +159,18 @@ export default function OrderList() {
           <Text
             style={[
               styles.status,
-              item.status === "Complete" ? styles.complete : styles.incomplete,
+              item.status === "Complete"
+                ? styles.complete
+                : styles.incomplete,
             ]}
           >
             {item.status}
           </Text>
         </TouchableOpacity>
       );
-    } else if (viewLevel === "class") {
+    }
+
+    if (viewLevel === "class") {
       return (
         <TouchableOpacity
           style={styles.row}
@@ -84,29 +184,33 @@ export default function OrderList() {
           <Text
             style={[
               styles.status,
-              item.status === "Complete" ? styles.complete : styles.incomplete,
+              item.status === "Complete"
+                ? styles.complete
+                : styles.incomplete,
             ]}
           >
             {item.status}
           </Text>
         </TouchableOpacity>
       );
-    } else {
-      return (
-        <View style={styles.row}>
-          <Text style={styles.cell}>{item.name}</Text>
-          <Text style={styles.cell}>{item.food}</Text>
-          <Text
-            style={[
-              styles.status,
-              item.status === "Delivered" ? styles.complete : styles.incomplete,
-            ]}
-          >
-            {item.status}
-          </Text>
-        </View>
-      );
     }
+
+    return (
+      <View style={styles.row}>
+        <Text style={styles.cell}>{item.name}</Text>
+        <Text style={styles.cell}>{item.food}</Text>
+        <Text
+          style={[
+            styles.status,
+            item.status === "Delivered"
+              ? styles.complete
+              : styles.incomplete,
+          ]}
+        >
+          {item.status}
+        </Text>
+      </View>
+    );
   };
 
   return (
@@ -119,11 +223,87 @@ export default function OrderList() {
           </TouchableOpacity>
         )}
         <Text style={styles.headerText}>
-          {viewLevel === "school" && "School Order List"}
+          {viewLevel === "school" && "MBG Order List"}
           {viewLevel === "class" && selectedSchool?.name}
           {viewLevel === "student" && selectedClass?.name}
         </Text>
       </View>
+
+      <FilterContainer>
+        <Text
+          style={{
+            fontSize: 16,
+            fontFamily: "Fredoka-Regular",
+            color: "#2F5D2B",
+            marginBottom: 4,
+          }}
+        >
+          FILTER BY:
+        </Text>
+
+        <PickerContainer>
+          <Picker
+            selectedValue={selectedCity}
+            onValueChange={(v) => {
+              setSelectedCity(v);
+              setSelectedSchool("All");
+            }}
+          >
+            <Picker.Item label="All Cities" value="All" />
+            <Picker.Item label="Depok" value="Depok" />
+            <Picker.Item label="Bekasi" value="Bekasi" />
+            <Picker.Item label="Jakarta" value="Jakarta" />
+          </Picker>
+        </PickerContainer>
+
+        <PickerContainer>
+          <Picker
+            selectedValue={selectedSchool}
+            onValueChange={(v) => setSelectedSchool(v)}
+          >
+            <Picker.Item label="All Schools" value="All" />
+            {schools
+              .filter(
+                (s) => selectedCity === "All" || s.city === selectedCity
+              )
+              .map((s) => (
+                <Picker.Item key={s.id} label={s.name} value={s} />
+              ))}
+          </Picker>
+        </PickerContainer>
+
+        <PickerContainer>
+          <Picker
+            selectedValue={selectedStatus}
+            onValueChange={(v) => setSelectedStatus(v)}
+          >
+            <Picker.Item label="All Status" value="All" />
+            <Picker.Item label="Complete" value="Complete" />
+            <Picker.Item label="Incomplete" value="Incomplete" />
+          </Picker>
+        </PickerContainer>
+
+        {/* LOAD BUTTON */}
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#2F5D2B",
+            paddingVertical: 10,
+            borderRadius: 10,
+          }}
+          onPress={applyFilters}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              fontFamily: "Fredoka-Bold",
+              fontSize: 16,
+              color: "white",
+            }}
+          >
+            Load
+          </Text>
+        </TouchableOpacity>
+      </FilterContainer>
 
       {/* Table Header */}
       <View style={styles.tableHeader}>
@@ -150,16 +330,16 @@ export default function OrderList() {
         )}
       </View>
 
-      {/* Table Content */}
+      {/* TABLE CONTENT */}
       <FlatList
         data={
           viewLevel === "school"
-            ? schools
+            ? filteredSchools
             : viewLevel === "class"
-            ? classes
-            : students
+            ? filteredClasses
+            : filteredStudents
         }
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(it) => it.id.toString()}
         renderItem={renderItem}
       />
     </View>
@@ -169,7 +349,7 @@ export default function OrderList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6FFF7",
+    backgroundColor: "#eff8f0ff",
     padding: 16,
   },
   headerRow: {
@@ -184,8 +364,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   headerText: {
-    fontSize: 20,
+    fontSize: 40,
     fontWeight: "600",
+    fontFamily: "Fredoka-Bold",
     color: "#2F5D2B",
   },
   tableHeader: {
@@ -200,6 +381,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#2F5D2B",
     textAlign: "center",
+    fontFamily: "Fredoka-Medium",
   },
   row: {
     flexDirection: "row",
@@ -215,6 +397,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     color: "#2F5D2B",
+    fontFamily: "Fredoka-Regular",
   },
   status: {
     flex: 1,
@@ -222,6 +405,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 4,
     overflow: "hidden",
+    fontFamily: "Fredoka-Regular",
   },
   complete: {
     backgroundColor: "#E8F5E9",
