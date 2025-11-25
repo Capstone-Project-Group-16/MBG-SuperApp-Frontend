@@ -10,6 +10,7 @@ export default function CookProgress() {
   const router = useRouter();
   const [selectedCity, setSelectedCity] = useState("All");
   const [selectedDate, setSelectedDate] = useState("Today");
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Dummy data sekolah
   const schoolData = [
@@ -17,6 +18,15 @@ export default function CookProgress() {
     { name: "SMAN 2 DEPOK", totalClass: 10, totalOrder: 420, progress: 40 },
     { name: "SMAN 3 DEPOK", totalClass: 6, totalOrder: 240, progress: 85 },
   ];
+
+const filteredSchools = isLoaded
+  ? schoolData.filter((school) => {
+      if (selectedCity !== "All" && !school.name.includes(selectedCity.toUpperCase())) {
+        return false;
+      }
+      return true;
+    })
+  : [];
 
   const handleBack = () => {
     router.replace("/home");
@@ -162,6 +172,21 @@ const ArrowText = styled.Text`
   color: #45a246;
 `;
 
+const LoadButton = styled.TouchableOpacity`
+  margin-top: 12px;
+  background-color: #45a246;
+  padding: 10px;
+  border-radius: 25px;
+  align-items: center;
+`;
+
+const LoadText = styled.Text`
+  font-family: "Fredoka-Regular";
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+`;
+
   return (
     <Container>
       {/* HEADER */}
@@ -203,6 +228,11 @@ const ArrowText = styled.Text`
             </Picker>
           </PickerContainer>
         </FilterRow>
+
+        <LoadButton onPress={() => setIsLoaded(true)}>
+          <LoadText>Load</LoadText>
+        </LoadButton>
+
       </FilterContainer>
 
       {/* RESULT SECTION */}
@@ -212,7 +242,7 @@ const ArrowText = styled.Text`
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}
       >
-        {schoolData.map((school, index) => (
+        {filteredSchools.map((school, index) => (
           <Card key={index}>
             <ProgressContainer>
               <AnimatedCircularProgress
