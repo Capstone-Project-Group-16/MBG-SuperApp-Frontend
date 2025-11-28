@@ -15,7 +15,7 @@ const Container = styled.View`
   align-items: center;
 
   background-color: #fff;
-  padding: 15px 10px;
+  padding: 15px 5px;
   border-top-width: 1px;
   border-top-color: #ddd;
   
@@ -48,6 +48,13 @@ export default function BottomNav() {
       <TouchableOpacity onPress={() => router.push("/deliveryList")}>
         <Image
           source={require("../assets/images/delivery-status.png")}
+          style={{ width: 30, height: 30 }}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push("/home")}>
+        <Image
+          source={require("../assets/images/home.png")}
           style={{ width: 30, height: 30 }}
         />
       </TouchableOpacity>
