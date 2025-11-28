@@ -1,3 +1,4 @@
+import BottomNav from "@/components/bottomNavigation";
 import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
@@ -342,6 +343,7 @@ export default function OrderList() {
         keyExtractor={(it) => it.id.toString()}
         renderItem={renderItem}
       />
+      <BottomNav />
     </View>
   );
 }

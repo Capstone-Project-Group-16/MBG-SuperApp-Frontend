@@ -10,6 +10,9 @@ export default function CookProgress() {
   const router = useRouter();
   const [selectedCity, setSelectedCity] = useState("All");
   const [selectedDate, setSelectedDate] = useState("Today");
+  const [appliedCity, setAppliedCity] = useState("All");
+  const [appliedDate, setAppliedDate] = useState("Today");
+
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Dummy data sekolah
@@ -19,18 +22,34 @@ export default function CookProgress() {
     { name: "SMAN 3 DEPOK", totalClass: 6, totalOrder: 240, progress: 85 },
   ];
 
+// const filteredSchools = isLoaded
+//   ? schoolData.filter((school) => {
+//       if (selectedCity !== "All" && !school.name.includes(selectedCity.toUpperCase())) {
+//         return false;
+//       }
+//       return true;
+//     })
+//   : [];
+
 const filteredSchools = isLoaded
   ? schoolData.filter((school) => {
-      if (selectedCity !== "All" && !school.name.includes(selectedCity.toUpperCase())) {
+      if (appliedCity !== "All" && !school.name.includes(appliedCity.toUpperCase())) {
         return false;
       }
       return true;
     })
   : [];
 
+
   const handleBack = () => {
     router.replace("/home");
   };
+
+//   const handleLoad = () => {
+//   setAppliedCity(selectedCity);
+//   setAppliedDate(selectedDate);
+// };
+
 
   // styled components
 const Container = styled.View`
@@ -229,9 +248,16 @@ const LoadText = styled.Text`
           </PickerContainer>
         </FilterRow>
 
-        <LoadButton onPress={() => setIsLoaded(true)}>
+        <LoadButton
+          onPress={() => {
+            setAppliedCity(selectedCity);
+            setAppliedDate(selectedDate);
+            setIsLoaded(true);
+          }}
+        >
           <LoadText>Load</LoadText>
         </LoadButton>
+
 
       </FilterContainer>
 
