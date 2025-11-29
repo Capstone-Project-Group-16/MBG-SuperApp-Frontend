@@ -1,7 +1,7 @@
 import BottomNav from "@/components/bottomNavigation";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Image, Text } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, Image, TouchableOpacity as RNTouchable, Text, useWindowDimensions } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import styled from "styled-components/native";
 
@@ -133,8 +133,41 @@ const IngredientCircle = styled.View`
   justify-content: center;
 `;
 
+const MenuOverlay = styled.TouchableOpacity`
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.35);
+  z-index: 90;
+`;
 
-// --- Main Component ---
+const MenuPanel = styled(Animated.View)`
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: ${/* will set via transform width, keep fallback */ '260px'};
+  background-color: white;
+  padding: 30px 18px;
+  z-index: 100;
+  elevation: 20;
+`;
+
+const MenuItem = styled.TouchableOpacity`
+  padding-vertical: 12px;
+  margin-bottom: 8px;
+`;
+
+const MenuItemText = styled.Text`
+  font-family: "Fredoka-Medium";
+  font-size: 18px;
+  color: #214626;
+`;
+
+
+// styled components
 const Home: React.FC = () => {
   const router = useRouter();
 
@@ -162,12 +195,73 @@ const Home: React.FC = () => {
   const cookingPercent =
     totalOrders > 0 ? Math.round((cookedCount / totalOrders) * 100) : 0;
 
+    // menu (sidebar) state + animation
+  const [menuOpen, setMenuOpen] = useState(false);
+  const slideAnim = useRef(new Animated.Value(-300)).current;
+  const { width: screenWidth } = useWindowDimensions();
+  const MENU_WIDTH = Math.min(300, Math.round(screenWidth * 0.75));
+
+  const openMenu = () => {
+    setMenuOpen(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeMenu = () => {
+    Animated.timing(slideAnim, {
+      toValue: -MENU_WIDTH,
+      duration: 180,
+      useNativeDriver: true,
+    }).start(() => setMenuOpen(false));
+  };
+
+  const navigateAndClose = (path: any) => {
+    closeMenu();
+    setTimeout(() => router.push(path), 200);
+  };
+
+
   return (
     <Container>
+
+    {menuOpen && (
+        <MenuOverlay activeOpacity={1} onPress={closeMenu}>
+        </MenuOverlay>
+      )}
+
+      <MenuPanel
+        style={{
+          width: MENU_WIDTH,
+          transform: [{ translateX: slideAnim }],
+          position: 'absolute',
+          zIndex: 100,
+        }}
+        pointerEvents={menuOpen ? 'auto' : 'none'}
+      >
+        <RNTouchable onPress={closeMenu} style={{ alignSelf: 'flex-end', padding: 6 }}>
+          <Text style={{ fontSize: 20, color: '#214626' }}>✕</Text>
+        </RNTouchable>
+
+        <MenuItem onPress={() => navigateAndClose('/orderList')}>
+          <MenuItemText>Order List</MenuItemText>
+        </MenuItem>
+
+        <MenuItem onPress={() => navigateAndClose('/cookProgress')}>
+          <MenuItemText>Cooking Progress</MenuItemText>
+        </MenuItem>
+
+        <MenuItem onPress={() => navigateAndClose('/deliveryList')}>
+          <MenuItemText>Delivery Progress</MenuItemText>
+        </MenuItem>
+      </MenuPanel>
+
       <ScrollArea showsVerticalScrollIndicator={false}>
       {/* Header */}
       <Header>
-        <BurgerButton>
+        <BurgerButton onPress={openMenu}>
           <Image source={require("../assets/images/burger.png")} style={{ width: 25, height: 25 }} />
         </BurgerButton>
 
