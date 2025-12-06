@@ -57,6 +57,57 @@ const CheckMapText = styled.div`
   color: black;
 `;
 
+const TopRow = styled.div`
+  display: flex;
+  gap: 25px;
+  margin-top: 25px;
+`;
+
+const NutritionCard = styled.div`
+  flex: 0.8;
+  background: white;
+  border-radius: 30px;
+  border: 2px solid rgba(69, 162, 70, 0.5);
+  padding: 20px 25px;
+  color: black;
+  height: fit-content;
+`;
+
+const NutritionTitle = styled.div`
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: black;
+`;
+
+const BarWrapper = styled.div`
+  margin-top: 15px;
+`;
+
+const BarRow = styled.div`
+  margin-bottom: 18px;
+`;
+
+const BarLabel = styled.div`
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+`;
+
+const BarBackground = styled.div`
+  width: 100%;
+  height: 16px;
+  border-radius: 10px;
+  background: #e8e8e8;
+`;
+
+const BarFill = styled.div<{ width: string }>`
+  height: 100%;
+  border-radius: 10px;
+  width: ${(props) => props.width};
+  background: linear-gradient(90deg, #45a246, #79d279);
+`;
+
 const SectionRow = styled.div`
   display: flex;
   gap: 25px;
@@ -94,6 +145,18 @@ const ActivityBox = styled.div`
 //   opacity: 0.7;
 //   color: black;
 // `;
+
+const FavMenuCard = styled.div`
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #45a246;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  color: black;
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+`;
 
 const StatLabel = styled.div`
   font-size: 15px;
@@ -149,33 +212,77 @@ export default function Dashboard() {
         <MainContent>
           <Title>Welcome, Government</Title>
 
-          {/* MAP SECTION */}
-          <Link to="/tracker">
-            <MapPreview src={MapImage} alt="Map Preview" />
-          </Link>
+          {/* Map + Average Nutrition Row */}
+          <TopRow>
+            <div style={{ flex: 1 }}>
+            <CheckMapText>Check the Map</CheckMapText>
+              <Link to="/tracker">
+                <MapPreview src={MapImage} alt="Map Preview" />
+              </Link>
+            </div>
 
-          <CheckMapText>Check the Map</CheckMapText>
+            {/* AVERAGE NUTRITION CARD */}
+            <NutritionCard>
+              <NutritionTitle>Average Nutrition %</NutritionTitle>
+
+              <BarWrapper>
+                <BarRow>
+                  <BarLabel>Calories – 78%</BarLabel>
+                  <BarBackground>
+                    <BarFill width="78%" />
+                  </BarBackground>
+                </BarRow>
+
+                <BarRow>
+                  <BarLabel>Protein – 65%</BarLabel>
+                  <BarBackground>
+                    <BarFill width="65%" />
+                  </BarBackground>
+                </BarRow>
+
+                <BarRow>
+                  <BarLabel>Carbohydrates – 82%</BarLabel>
+                  <BarBackground>
+                    <BarFill width="82%" />
+                  </BarBackground>
+                </BarRow>
+
+                <BarRow>
+                  <BarLabel>Vitamins – 74%</BarLabel>
+                  <BarBackground>
+                    <BarFill width="74%" />
+                  </BarBackground>
+                </BarRow>
+              </BarWrapper>
+            </NutritionCard>
+          </TopRow>
 
           <SectionRow>
 
             {/* Recent Activity */}
             <CardLarge>
               <SectionTitle>Recent Activities</SectionTitle>
-
               {/* Placeholder API */}
               <ActivityBox>No recent activity yet.</ActivityBox>
             </CardLarge>
 
-            {/* Recent Report */}
+            {/* Favorite Menu */}
             <CardLarge>
               <SectionTitle>
-                Recent <span style={{ color: "#E00000" }}>Report</span>
+                Favorite Menu per Week
               </SectionTitle>
+{/* harusnya disini placeholder API karena nerima data berapa banyak yang mesen */}
+              <FavMenuCard>
+                <div>Ultimate Hero Feast</div>
+                <div>Total pesanan: </div>
+              </FavMenuCard>
 
-              {/* Placeholder API */}
-              <ActivityBox>No reports available.</ActivityBox>
+              <FavMenuCard>
+                <div>Speed Runner Combo</div>
+                <div>Total pesanan: </div>
+              </FavMenuCard>
+
             </CardLarge>
-
           </SectionRow>
 
           <CardLarge style={{ marginTop: "35px" }}>
