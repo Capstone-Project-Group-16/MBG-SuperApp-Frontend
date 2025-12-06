@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Image,
+  Linking,
   StyleSheet,
   Text,
   TextInput,
@@ -16,10 +17,6 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     router.replace("/home");
-  };
-
-  const goToRegister = () => {
-    router.push("/register");
   };
 
   return (
@@ -53,10 +50,10 @@ export default function LoginScreen() {
         onChangeText={setPassword}
       />
 
-      {/* FORGOT PASSWORD */}
+      {/* FORGOT PASSWORD
       <TouchableOpacity>
         <Text style={styles.forgot}>Forgot password?</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* SIGN IN BUTTON */}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -66,7 +63,7 @@ export default function LoginScreen() {
       {/* REGISTER LINK */}
       <Text style={styles.footerText}>
         Don’t have an account?{" "}
-        <Text style={styles.link} onPress={goToRegister}>
+        <Text style={styles.link} onPress={() => Linking.openURL("https://forms.gle/b4Qvpz9kCi9QF6dt5")}>
           Register here
         </Text>
       </Text>

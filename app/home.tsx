@@ -6,14 +6,15 @@ import { AnimatedCircularProgress } from "react-native-circular-progress";
 import styled from "styled-components/native";
 
 // styled components
-const Container = styled.ScrollView`
+const Container = styled.View`
   flex: 1;
   background-color: white;
-  padding: 20px;
 `;
 
 const ScrollArea = styled.ScrollView`
   flex: 1;
+  padding: 20px;
+  margin-bottom: 90px;
 `;
 
 const Header = styled.View`
@@ -325,31 +326,14 @@ const Home: React.FC = () => {
         </StatRow>
       </Card>
 
-      {/* Ingredients Section */}
-      <SectionTitle>Most ordered ingredients in a week</SectionTitle>
-      <IngredientCard>
-        <IngredientList>
-          {topIngredients.length > 0 ? (
-            topIngredients.map((item, index) => (
-              <IngredientCircle key={index}>
-                <Text>{item}</Text>
-              </IngredientCircle>
-            ))
-          ) : (
-            <>
-              <IngredientCircle />
-              <IngredientCircle />
-              <IngredientCircle />
-            </>
-          )}
-        </IngredientList>
-        {/* pake nanti aja. belum ada const. <SeeMore>See more</SeeMore> */}
-      </IngredientCard>
+      <SectionTitle>What should we do today?</SectionTitle>
+
       </ScrollArea>
 
-        <BottomNav/>
+      <BottomNav/>
       
     </Container>
+    
   );
 };
 

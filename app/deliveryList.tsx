@@ -9,18 +9,19 @@ import { Image } from "react-native";
 import styled from "styled-components/native";
 
 // styled components
-const Container = styled.ScrollView.attrs({
+const Container = styled.View.attrs({
   contentContainerStyle: {
     paddingBottom: 100,
   },
 })`
   flex: 1;
   background-color: white;
-  padding: 20px;
 `;
 
 const ScrollArea = styled.ScrollView`
   flex: 1;
+  padding: 20px;
+  margin-bottom: 90px;
 `;
 
 const Title = styled.Text`
