@@ -67,7 +67,7 @@ export default function LoginScreen() {
       <Text style={styles.footerText}>
         Don’t have an account?{" "}
         <Text style={styles.link} onPress={goToRegister}>
-          Sign up here
+          Register here
         </Text>
       </Text>
     </View>
