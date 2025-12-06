@@ -56,18 +56,23 @@ const Input = styled.input`
   border: 2px solid #214626;
   background: #ecf0f3;
   font-size: 16px;
+  color: black;
+  ::placeholder {
+    color: #555;
+    opacity: 1;
+  }
 `;
 
-const ForgotPassword = styled.div`
-  width: 100%;
-  text-align: right;
-  font-family: Fredoka;
-  font-size: 14px;
-  text-decoration: underline;
-  cursor: pointer;
-  margin-top: -10px;
-  margin-bottom: 25px;
-`;
+// const ForgotPassword = styled.div`
+//   width: 100%;
+//   text-align: right;
+//   font-family: Fredoka;
+//   font-size: 14px;
+//   text-decoration: underline;
+//   cursor: pointer;
+//   margin-top: -10px;
+//   margin-bottom: 25px;
+// `;
 
 const SignInButton = styled.button`
   width: 100%;
@@ -98,6 +103,8 @@ const SignUpLink = styled.span`
 export default function LoginPage() {
   const navigate = useNavigate();
 
+  const registrationLink = "https://forms.gle/6NUcPm8zaY5HxG6x7";
+
   return (
     <PageContainer>
       <Card>
@@ -107,16 +114,17 @@ export default function LoginPage() {
 
         <InputContainer>
           <Label>Email</Label>
-          <Input type="email" />
+          <Input type="email"
+                placeholder="Enter your email"/>
         </InputContainer>
 
         <InputContainer>
           <Label>Password</Label>
-          <Input type="password" />
+          <Input type="password"
+                placeholder="Enter your password"/>
         </InputContainer>
 
-        {/* Forgot Password belum berfungsi, cuma placeholder */}
-        <ForgotPassword>Forgot password?</ForgotPassword>
+        {/* <ForgotPassword>Forgot password?</ForgotPassword> */}
 
         <SignInButton onClick={() => navigate("/dashboard")}>
           Sign In
@@ -124,7 +132,7 @@ export default function LoginPage() {
 
         <FooterText>
           Don’t have an account?{" "}
-          <SignUpLink onClick={() => navigate("/register")}>
+          <SignUpLink onClick={() => window.open(registrationLink, "_blank")}>
             Register here
           </SignUpLink>
         </FooterText>
