@@ -18,10 +18,41 @@ export default function SignInScreen({ navigation }: Props) {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
-  const onSignIn = () => {
-    Alert.alert("Signed In", `Email: ${email}`)
-    ;(navigation as any).replace("Home")
+  const onSignIn = async () => {
+  if (!email || !password) {
+    Alert.alert("Error", "Email dan password harus diisi");
+    return;
   }
+
+  try {
+    const res = await fetch("http://192.168.1.9:8000/api/account/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userEmail: email,
+        userPassword: password,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      Alert.alert("Login Failed", data.detail || "Invalid credentials");
+      return;
+    }
+
+    console.log("LOGIN SUCCESS:", data);
+
+    Alert.alert("Success", "Login berhasil!");
+    (navigation as any).replace("Home");
+  } catch (error) {
+    console.log(error);
+    Alert.alert("Network Error", "Tidak bisa terhubung ke server");
+  }
+};
+
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
