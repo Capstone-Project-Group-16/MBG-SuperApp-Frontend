@@ -17,26 +17,31 @@ export default function FoodWaste({ navigation }: Props) {
         suggestion: "Mantap! Kamu sudah menghabiskan 80% makananmu. Teruskan kebiasaan baik ini agar tubuh sehat dan makanan tidak terbuang sia-sia!",
         recommendations: [
             {
-                title: "Meals 1",
-                description: "Gurnihya ikan segar, nasi pulen, dan sayur penuh vitamin bikin kuat seharian!",
-                icon: require("../../assets/icon/bento-1.png"),
+                id: "1",
+                title: "Ultimate Hero Feast",
+                description: "Santapan para pahlawan utama yang meningkatkan daya tahan tubuh",
+                foods: [
+                    { id: "1", label: "Milk", icon: require("../../assets/icon/menu/milk.png") },
+                    { id: "2", label: "Banana", icon: require("../../assets/icon/menu/banana.png") },
+                    { id: "3", label: "Broccoli", icon: require("../../assets/icon/menu/broccoli.png") },
+                    { id: "4", label: "Rice", icon: require("../../assets/icon/menu/rice.png") },
+                    { id: "5", label: "Chicken", icon: require("../../assets/icon/menu/chicken.png") },
+                ],
             },
             {
-                title: "Meals 2",
-                description: "Nasi goreng dengan ikan, telur, dan sayur gula bikin semangat belajar!",
-                icon: require("../../assets/icon/bento-2.png"),
-            },
+                id: "2",
+                title: "Speed Runner Combo",
+                description: "Kombinasi makanan yang membuatmu bergerak cepat seperti kilat",
+                foods: [
+                    { id: "1", label: "Orange Juice", icon: require("../../assets/icon/menu/orange-juice.png") },
+                    { id: "2", label: "Watermelon", icon: require("../../assets/icon/menu/watermelon.png") },
+                    { id: "3", label: "Carrot", icon: require("../../assets/icon/menu/carrot.png") },
+                    { id: "4", label: "Rice", icon: require("../../assets/icon/menu/rice.png") },
+                    { id: "5", label: "Fish", icon: require("../../assets/icon/menu/fish.png") },
+                ],
+            }
         ],
     })
-
-    const [likedItems, setLikedItems] = useState<{ [key: number]: boolean }>({})
-
-    const toggleLike = (index: number) => {
-        setLikedItems((prev) => ({
-            ...prev,
-            [index]: !prev[index],
-        }))
-    }
 
     return (
         <SafeAreaView style={styles.root}>
@@ -47,8 +52,8 @@ export default function FoodWaste({ navigation }: Props) {
                 <View style={{ flex: 1 }} />
                 <StatusBar
                     items={[
-                        { label: "Energy", icon: require("../../assets/icon/thunder.png"), value: "70000", textColor: colors.textGold },
-                        { label: "Hearts", icon: require("../../assets/icon/diamond.png"), value: "70000", textColor: colors.textBlue },
+                        { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: "70000", textColor: colors.textGold },
+                        { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: "70000", textColor: colors.textBlue },
                     ]}
                 />
             </View>
@@ -57,20 +62,19 @@ export default function FoodWaste({ navigation }: Props) {
                 <Text style={styles.title}>Food Waste Analysis</Text>
 
                 <View style={styles.circleContainer}>
-                    <Text style={styles.scoreLabel}>Meal Score</Text>
                     <CircularProgress
                         value={wasteData.mealScore}
                         max={100}
                         unit="%"
-                        gradientColors={["#3DD806", "#3DD806"]}
-                        backgroundColor="#7BFF5A"
-                        sizePercent={50}
-                        strokePercent={6}
-                        valueFontSize={RFValue(28)}
-                        unitFontSize={RFValue(28)}
+                        gradientColors={[colors.gradDarkGreen, colors.gradLightGreen]}
+                        backgroundColor={colors.bgGreen}
+                        sizePercent={55}
+                        strokePercent={8}
+                        valueFontSize={RFValue(30)}
                     />
                 </View>
-
+                
+                {/* Suggestion */}
                 <SuggestionCard label="Suggestion" text={wasteData.suggestion} />
 
                 {/* Recommendations */}
@@ -78,14 +82,7 @@ export default function FoodWaste({ navigation }: Props) {
                 {wasteData.recommendations.map((rec, idx) => (
                     <SuggestionCard
                         key={idx}
-                        isRecommendation={true}
-                        mealIcon={rec.icon}
-                        mealTitle={rec.title}
-                        mealDescription={rec.description}
-                        label=""
-                        text=""
-                        isLiked={likedItems[idx] || false}
-                        onLikPress={() => toggleLike(idx)}
+                        item={rec}
                     />
                 ))}
 
@@ -106,7 +103,13 @@ const styles = StyleSheet.create({
         gap: wp("3%"),
     },
     close: { paddingVertical: hp("1%"), paddingHorizontal: wp("1%") },
-    closeIcon: { width: wp("6%"), height: wp("6%"), marginBottom: hp("0.5%") }, content: { paddingHorizontal: wp("4%"), paddingTop: hp("1.5%") },
+    closeIcon: {
+        width: wp("6%"),
+        height: wp("6%"),
+        marginBottom: hp("0.5%"),
+        tintColor: colors.brandBorder
+    },
+    content: { paddingHorizontal: wp("4%"), paddingTop: hp("1.5%") },
     title: {
         fontFamily: "Fredoka-SemiBold",
         fontSize: RFValue(22),
@@ -117,6 +120,5 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     circleContainer: { alignItems: "center", marginBottom: hp("3%"), gap: hp("1.5%") },
-    scoreLabel: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(16), color: colors.textBlack },
-    sectionTitle: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(16), color: colors.textBlack, marginBottom: hp("2%") },
+    sectionTitle: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(20), color: colors.textBlack, marginLeft: hp("1.5%")},
 })

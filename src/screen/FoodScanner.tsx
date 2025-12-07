@@ -14,7 +14,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "FoodScanner">
 export default function FoodScanner({ navigation, route }: Props) {
   const cameraRef = useRef<CameraView>(null)
   const [flashEnabled, setFlashEnabled] = useState(false)
-  const scanMode = route.params?.scanMode || "nutrition"
+  const scanMode = route.params?.scanMode || "distribution" 
 
   const toggleFlash = async () => {
     setFlashEnabled((prev) => !prev)
@@ -24,21 +24,21 @@ export default function FoodScanner({ navigation, route }: Props) {
     if (scanMode === "waste") {
       return "Foto piringmu setelah selesai makan"
     }
-    return "Foto piringmu untuk analisis nutrisi"
+    return "Foto piringmu untuk konfirmasi pesanan diterima"
   }
 
   const getTitle = () => {
     if (scanMode === "waste") {
       return "Waste Scanner"
     }
-    return "Nutrition Scanner"
+    return "Confirm Delivery"
   }
 
   const handleScan = () => {
     if (scanMode === "waste") {
       navigation.navigate("FoodWaste")
     } else {
-      navigation.navigate("NutritionAnalysis")
+      navigation.navigate("DistributionTracker")
     }
   }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native"
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, ImageBackground } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
@@ -12,32 +12,79 @@ import Button from "../components/Button"
 
 type Props = NativeStackScreenProps<RootStackParamList, "FoodOrder">
 
-const FOOD_ITEMS = [
-    { id: "1", label: "Rice", icon: require("../../assets/icon/menu/rice.png") },
-    { id: "2", label: "Potato", icon: require("../../assets/icon/menu/potato.png") },
-    { id: "3", label: "Bread", icon: require("../../assets/icon/menu/bread.png") },
-    { id: "4", label: "Corn", icon: require("../../assets/icon/menu/corn.png") },
-    { id: "5", label: "Chicken", icon: require("../../assets/icon/menu/chicken.png") },
-    { id: "6", label: "Eggs", icon: require("../../assets/icon/menu/eggs.png") },
-    { id: "7", label: "Fish", icon: require("../../assets/icon/menu/fish.png") },
-    { id: "8", label: "Tempe", icon: require("../../assets/icon/menu/tempe.png") },
-    { id: "9", label: "Broccoli", icon: require("../../assets/icon/menu/broccoli.png") },
-    { id: "10", label: "Carrot", icon: require("../../assets/icon/menu/carrot.png") },
-    { id: "11", label: "Tomato", icon: require("../../assets/icon/menu/tomato.png") },
-    { id: "12", label: "Lettuce", icon: require("../../assets/icon/menu/lettuce.png") },
-    { id: "13", label: "Watermelon", icon: require("../../assets/icon/menu/watermelon.png") },
-    { id: "14", label: "Orange", icon: require("../../assets/icon/menu/orange.png") },
-    { id: "15", label: "Banana", icon: require("../../assets/icon/menu/banana.png") },
-    { id: "16", label: "Papaya", icon: require("../../assets/icon/menu/papaya.png") },
-    { id: "17", label: "Milk", icon: require("../../assets/icon/menu/milk.png") },
-    { id: "18", label: "Orange Juice", icon: require("../../assets/icon/menu/orange-juice.png") },
-    { id: "19", label: "Apple Juice", icon: require("../../assets/icon/menu/apple-juice.png") },
-    { id: "20", label: "Coconut Water", icon: require("../../assets/icon/menu/coconut.png") },
+const MENU_ITEMS = [
+    {
+        id: "1",
+        title: "Ultimate Hero Feast",
+        description:
+            "Santapan para pahlawan utama yang meningkatkan daya tahan tubuh",
+        price: "Rp15.000",
+        foods: [
+            { id: "1", label: "Milk", icon: require("../../assets/icon/menu/milk.png") },
+            { id: "2", label: "Banana", icon: require("../../assets/icon/menu/banana.png") },
+            { id: "3", label: "Broccoli", icon: require("../../assets/icon/menu/broccoli.png") },
+            { id: "4", label: "Rice", icon: require("../../assets/icon/menu/rice.png") },
+            { id: "5", label: "Chicken", icon: require("../../assets/icon/menu/chicken.png") },
+        ],
+    },
+    {
+        id: "2",
+        title: "Speed Runner Combo",
+        description: "Kombinasi makanan yang membuatmu bergerak cepat seperti kilat",
+        price: "Rp15.000",
+        foods: [
+            { id: "1", label: "Orange Juice", icon: require("../../assets/icon/menu/orange-juice.png") },
+            { id: "2", label: "Watermelon", icon: require("../../assets/icon/menu/watermelon.png") },
+            { id: "3", label: "Carrot", icon: require("../../assets/icon/menu/carrot.png") },
+            { id: "4", label: "Rice", icon: require("../../assets/icon/menu/rice.png") },
+            { id: "5", label: "Fish", icon: require("../../assets/icon/menu/fish.png") },
+        ],
+    },
+    {
+        id: "3",
+        title: "Nature Guardian Set",
+        description:
+            "Bekal dari hutan pelindung yang meningkatkan kekuatan alami tubuh",
+        price: "Rp15.000",
+        foods: [
+            { id: "1", label: "Apple Juice", icon: require("../../assets/icon/menu/apple-juice.png") },
+            { id: "2", label: "Papaya", icon: require("../../assets/icon/menu/papaya.png") },
+            { id: "3", label: "Lettuce", icon: require("../../assets/icon/menu/lettuce.png") },
+            { id: "4", label: "Potato", icon: require("../../assets/icon/menu/potato.png") },
+            { id: "5", label: "Tempe", icon: require("../../assets/icon/menu/tempe.png") },
+        ],
+    },
+    {
+        id: "4",
+        title: "Warrior Meal Boost",
+        description:
+            "Makanan favorit para pejung agar dapat memulihkan tenaga",
+        price: "Rp15.000",
+        foods: [
+            { id: "1", label: "Oat Milk", icon: require("../../assets/icon/menu/oat-milk.png") },
+            { id: "2", label: "Orange", icon: require("../../assets/icon/menu/orange.png") },
+            { id: "3", label: "Tomato", icon: require("../../assets/icon/menu/tomato.png") },
+            { id: "4", label: "Bread", icon: require("../../assets/icon/menu/bread.png") },
+            { id: "5", label: "Eggs", icon: require("../../assets/icon/menu/eggs.png") },
+        ],
+    },
+    {
+        id: "5",
+        title: "Power Up Starter",
+        description: "Paket pemula yang membangkitkan energi dasar tubuh",
+        price: "Rp15.000",
+        foods: [
+            { id: "1", label: "Milk", icon: require("../../assets/icon/menu/milk.png") },
+            { id: "2", label: "Watermelon", icon: require("../../assets/icon/menu/watermelon.png") },
+            { id: "3", label: "Lettuce", icon: require("../../assets/icon/menu/lettuce.png") },
+            { id: "4", label: "Rice", icon: require("../../assets/icon/menu/rice.png") },
+            { id: "5", label: "Eggs", icon: require("../../assets/icon/menu/eggs.png") },
+        ],
+    },
 ]
 
 export default function FoodOrder({ route, navigation }: Props) {
-    const { selectedItems } = route.params
-    const selectedFoods = FOOD_ITEMS.filter((item) => selectedItems.includes(item.id))
+    const { selectedFoods } = route.params
 
     const handleOrderNow = () => {
         console.log("[v0] Order placed with items:", selectedFoods)
@@ -67,14 +114,23 @@ export default function FoodOrder({ route, navigation }: Props) {
                 <Text style={styles.avatar}>👩</Text>
             </View>
 
-            {/* Food tray with selected items */}
-            <View style={styles.trayContainer}>
-                <FoodTray selectedFoods={selectedFoods} />
-            </View>
+            <View style={styles.trayWrapper}>
+                {/* Background for food tray */}
+                <ImageBackground
+                    source={require("../../assets/icon/table.png")}
+                    style={styles.tableBackground}
+                    resizeMode="cover"
+                >
+                    {/* Food tray with selected items */}
+                    <View style={styles.trayContainer}>
+                        <FoodTray selectedFoods={selectedFoods} size={0.9} />
+                    </View>
 
-            {/* Order button */}
-            <View style={styles.buttonContainer}>
-                <Button title="ORDER NOW" onPress={handleOrderNow} />
+                    {/* Order button */}
+                    <View style={styles.buttonContainer}>
+                        <Button title="ORDER NOW" onPress={handleOrderNow} />
+                    </View>
+                </ImageBackground>
             </View>
         </SafeAreaView>
     )
@@ -102,12 +158,21 @@ const styles = StyleSheet.create({
     avatar: {
         fontSize: RFValue(100),
     },
-    trayContainer: {
+    trayWrapper: {
         flex: 1,
+        width: "100%",
+        overflow: "hidden",
+    },
+    tableBackground: {
+        width: "100%",
+        height: "90%",
+        justifyContent: "flex-end",
+        marginTop: hp("15%"),
+    },
+    trayContainer: {
         justifyContent: "center",
         alignItems: "center",
-        paddingHorizontal: wp("4%"),
-        marginBottom: hp("3%"),
+        marginBottom: hp("2.5%"),
     },
-    buttonContainer: { paddingHorizontal: wp("4%"), paddingBottom: hp("7%"),},
+    buttonContainer: { paddingHorizontal: wp("5%"), paddingBottom: hp("15%") },
 })

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, Pressable, Alert, KeyboardAvoidingView, Platform, Image } from "react-native"
+import { View, Text, StyleSheet, Pressable, Alert, KeyboardAvoidingView, Platform, Image, Linking } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
@@ -51,22 +51,12 @@ export default function SignInScreen({ navigation }: Props) {
           onPressRightAdornment={() => setShowPassword((s) => !s)}
         />
 
-        {/* 
-        <Pressable
-          onPress={() => Alert.alert("Forgot Password", "Implement your reset flow")}
-          accessibilityRole="button"
-          style={styles.forgot}
-        >
-          <Text style={styles.forgotText}>Forgot password?</Text>
-        </Pressable> 
-        */}
-
         <Button title="SIGN IN" onPress={onSignIn} style={{ marginTop: hp("1%") }} />
 
         <Text style={styles.footer}>
           {"Don't have an account? "}
-          <Text style={styles.link} onPress={() => navigation.navigate("SignUp")}>
-            Sign up here
+          <Text style={styles.link} onPress={() => Linking.openURL("https://forms.gle/6H4VXToNmtwMtbDu6")}>
+            Register here
           </Text>
         </Text>
       </View>

@@ -38,10 +38,10 @@ export default function HomeScreen({ navigation }: Props) {
         />
         <View style={{ height: hp("3%") }} />
         <FeatureCard
-          title="Nutrition Analysis"
-          description="Scan makananmu, lihat kekuatan nutrisi di baliknya!"
-          icon={require("../../assets/icon/nutrition-analysis.png")}
-          onPress={() => navigation.navigate("FoodScanner", { scanMode: "nutrition" })}
+          title="Nutrition Facts"
+          description="Cek kekuatan nutrisi yang ada di balik makananmu!"
+          icon={require("../../assets/icon/nutrition-facts.png")}
+          onPress={() => navigation.navigate("NutritionFacts")}
         />
         <View style={{ height: hp("3%") }} />
         <FeatureCard
@@ -63,9 +63,9 @@ export default function HomeScreen({ navigation }: Props) {
       <NavBar
         items={[
           { label: "Home", icon: require("../../assets/icon/home.png"), active: true, onPress: () => {} },
-          { label: "Distribution", icon: require("../../assets/icon/distribution.png"), onPress: () => {} },
+          { label: "Distribution", icon: require("../../assets/icon/distribution.png"), onPress: () => navigation.navigate("FoodScanner", { scanMode: "distribution" }),},
           { label: "Spin Wheel", icon: require("../../assets/icon/spin-wheel.png"), onPress: () => {} },
-          { label: "Leaderboard", icon: require("../../assets/icon/leaderboard.png"), onPress: () => {} },
+          { label: "Leaderboard", icon: require("../../assets/icon/leaderboard.png"), onPress: () => navigation.navigate("Leaderboard"), },
         ]}
       />
     </SafeAreaView>

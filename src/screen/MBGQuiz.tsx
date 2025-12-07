@@ -55,6 +55,24 @@ export default function QuizScreen({ navigation }: Props) {
         setSelectedAnswer(index)
     }
 
+    const goNext = () => {
+        if (selectedAnswer === null) return
+
+        if (currentQuestion < quizData.length - 1) {
+            setCurrentQuestion((prev) => prev + 1)
+            setSelectedAnswer(null)
+        } else {
+            handleSubmit()
+        }
+    }
+
+    const goBack = () => {
+        if (currentQuestion > 0) {
+            setCurrentQuestion((prev) => prev - 1)
+            setSelectedAnswer(null)
+        }
+    }
+
     const handleSubmit = () => {
         let updatedScore = score
 
@@ -66,15 +84,15 @@ export default function QuizScreen({ navigation }: Props) {
             setCurrentQuestion(currentQuestion + 1)
             setSelectedAnswer(null)
             return
-        } 
+        }
 
         navigation.navigate("QuizResult", {
-        score: Math.round((updatedScore / quizData.length) * 100),
-        correct: updatedScore,
-        incorrect: quizData.length - updatedScore,
-        xp: updatedScore * 10, 
-        gems: updatedScore * 2,
-    })
+            score: Math.round((updatedScore / quizData.length) * 100),
+            correct: updatedScore,
+            incorrect: quizData.length - updatedScore,
+            xp: updatedScore * 10,
+            gems: updatedScore * 2,
+        })
     }
 
     const progressPercent = ((currentQuestion + 1) / quizData.length) * 100
@@ -108,7 +126,23 @@ export default function QuizScreen({ navigation }: Props) {
             </ScrollView>
 
             <View style={styles.buttonContainer}>
-                <Button title="SUBMIT" onPress={handleSubmit} disabled={selectedAnswer === null}/>
+                <View style={styles.rowButtons}>
+                    <View style={{ flex: 1, marginRight: hp("6%") }}>
+                        <Button
+                            title="BACK"
+                            onPress={goBack}
+                            disabled={currentQuestion === 0}
+                        />
+                    </View>
+
+                    <View style={{ flex: 1, marginLeft: hp("6%") }}>
+                        <Button
+                            title="NEXT"
+                            onPress={goNext}
+                            disabled={selectedAnswer === null}
+                        />
+                    </View>
+                </View>
             </View>
         </SafeAreaView>
     )
@@ -128,7 +162,7 @@ const styles = StyleSheet.create({
     backIcon: { width: wp("6%"), height: wp("6%"), tintColor: colors.brandBorder, marginBottom: hp("0.5%") },
     progressContainer: {
         height: hp("2%"),
-        backgroundColor: colors.active,
+        backgroundColor: colors.brandGrey,
         marginHorizontal: wp("4%"),
         borderRadius: wp("3%"),
         overflow: "hidden",
@@ -139,5 +173,6 @@ const styles = StyleSheet.create({
         borderRadius: wp("3%"),
     },
     content: { paddingHorizontal: wp("4%"), paddingTop: hp("3%"), paddingBottom: hp("2%") },
+    rowButtons: { flexDirection: "row", justifyContent: "space-between", },
     buttonContainer: { paddingHorizontal: wp("4%"), paddingBottom: hp("7%"), },
 })

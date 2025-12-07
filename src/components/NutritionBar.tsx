@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFValue } from "react-native-responsive-fontsize"
+import { colors } from "../theme/Color"
 
 type Props = {
   label: string
@@ -37,18 +38,18 @@ const styles = StyleSheet.create({
     marginBottom: hp("0.75%"),
   },
   label: {
-    fontFamily: "Fredoka-Medium",
+    fontFamily: "Jost-Medium",
     fontSize: RFValue(12),
     color: "#000",
   },
   value: {
-    fontFamily: "Fredoka-Medium",
+    fontFamily: "Jost-Medium",
     fontSize: RFValue(12),
     color: "#000",
   },
   barBackground: {
     height: hp("2%"),
-    backgroundColor: "rgba(0,0,0,0.1)",
+    backgroundColor: colors.brandGrey,
     borderRadius: wp("3%"),
     overflow: "hidden",
   },

@@ -10,10 +10,11 @@ interface FoodItem {
 
 interface FoodTrayProps {
   selectedFoods: FoodItem[]
+  size?: number
 }
 
-export default function FoodTray({ selectedFoods }: FoodTrayProps) {
-  const trayWidth = wp("75%")
+export default function FoodTray({ selectedFoods, size = 0.50 }: FoodTrayProps) {
+  const trayWidth = wp(size * 100 + "%")
   const trayHeight = trayWidth * 0.7
 
     // Map selected foods to tray slots

@@ -45,15 +45,15 @@ export default function QuizResult({ route }: QuizResultScreenProps) {
                 <View style={{ flex: 1 }} />
                 <StatusBar
                     items={[
-                        { label: "Energy", icon: require("../../assets/icon/thunder.png"), value: "70000", textColor: colors.textGold },
-                        { label: "Hearts", icon: require("../../assets/icon/diamond.png"), value: "70000", textColor: colors.textBlue },
+                        { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: "70000", textColor: colors.textGold },
+                        { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: "70000", textColor: colors.textBlue },
                     ]}
                 />
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-                {/* Total Score Card */}
                 <View style={styles.scoreCard}>
+                    {/* Total Score Card */}
                     <Text style={styles.scoreTitle}>Total Score</Text>
 
                     <View style={styles.circularProgressContainer}>
@@ -61,12 +61,11 @@ export default function QuizResult({ route }: QuizResultScreenProps) {
                             value={score}
                             max={100}
                             unit="%"
-                            gradientColors={["#3DD806", "#3DD806"]}
-                            backgroundColor="#7BFF5A"
-                            sizePercent={45}
+                            gradientColors={[colors.gradDarkGreen, colors.gradLightGreen]}
+                            backgroundColor={colors.bgGreen}
+                            sizePercent={55}
                             strokePercent={8}
-                            valueFontSize={RFValue(28)}
-                            unitFontSize={RFValue(28)}
+                            valueFontSize={RFValue(30)}
                         />
                     </View>
 
@@ -76,7 +75,7 @@ export default function QuizResult({ route }: QuizResultScreenProps) {
                             <ScoreCard
                                 label="True"
                                 value={`${correct}/3`}
-                                icon={<Text style={styles.checkIcon}>✓</Text>}
+                                icon={require("../../assets/icon/true.png")}
                                 backgroundColor={colors.scoreGreen}
                                 borderColor={colors.nutriGreen}
                             />
@@ -86,7 +85,7 @@ export default function QuizResult({ route }: QuizResultScreenProps) {
                             <ScoreCard
                                 label="False"
                                 value={`${incorrect}/3`}
-                                icon={<Text style={styles.xIcon}>×</Text>}
+                                icon={require("../../assets/icon/false.png")}
                                 backgroundColor={colors.scorePink}
                                 borderColor={colors.nutriPink}
                             />
@@ -94,9 +93,9 @@ export default function QuizResult({ route }: QuizResultScreenProps) {
 
                         <View style={styles.cardWrapper}>
                             <ScoreCard
-                                label="XP"
+                                label="Exp"
                                 value={xp}
-                                icon={<Text style={styles.xpIcon}>⚡</Text>}
+                                icon={require("../../assets/icon/thunder.png")}
                                 backgroundColor={colors.scoreOrange}
                                 borderColor={colors.nutriOrange}
                             />
@@ -106,7 +105,7 @@ export default function QuizResult({ route }: QuizResultScreenProps) {
                             <ScoreCard
                                 label="Gems"
                                 value={gems}
-                                icon={<Text style={styles.gemsIcon}>💎</Text>}
+                                icon={require("../../assets/icon/diamond.png")}
                                 backgroundColor={colors.scoreBlue}
                                 borderColor={colors.nutriBlue}
                             />
@@ -131,56 +130,32 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "center",
+        gap: wp("2.5%"),
         paddingHorizontal: wp("4%"),
-        marginTop: hp("1.25%"),
         paddingTop: hp("4%"),
-        gap: wp("3%"),
+        marginTop: hp("1.25%"),
     },
     close: { paddingVertical: hp("1%"), paddingHorizontal: wp("1%") },
-    closeIcon: { width: wp("6%"), height: wp("6%"), marginBottom: hp("0.5%") }, content: { paddingHorizontal: wp("4%"), paddingTop: hp("1.5%") },
-    statsPill: {
-        flexDirection: "row",
-        backgroundColor: colors.white,
-        borderWidth: wp("0.5%"),
-        borderColor: colors.brandBorder,
-        borderRadius: wp("8%"),
-        paddingHorizontal: wp("4%"),
-        paddingVertical: hp("1%"),
-        alignItems: "center",
-        gap: wp("2%"),
-    },
-    statsText: {
-        fontFamily: "Fredoka-Medium",
-        fontSize: RFValue(12),
-        color: colors.textBlack,
-    },
-    statsDivider: {
-        color: colors.brandBorder,
-        fontSize: RFValue(16),
-    },
+    closeIcon: { width: wp("6%"), height: wp("6%"), marginBottom: hp("0.5%"), tintColor: colors.brandBorder },
+    content: { paddingHorizontal: wp("4%") },
     cardWrapper: {
         width: "48%",
         marginBottom: hp("2%"),
     },
     scoreCard: {
-        backgroundColor: colors.white,
-        borderWidth: wp("0.8%"),
-        borderColor: colors.brandBorder,
-        borderRadius: wp("6%"),
-        padding: wp("6%"),
+        paddingHorizontal: wp("6%"),
+        marginTop: hp("2%"),
         marginBottom: hp("2%"),
         alignItems: "center",
-        shadowColor: colors.brandGreen,
-        shadowOpacity: 0.05,
-        shadowRadius: 6,
-        shadowOffset: { width: 2, height: 2 },
-        elevation: 6,
     },
     scoreTitle: {
-        fontFamily: "Fredoka-Bold",
-        fontSize: RFValue(24),
+        fontFamily: "Fredoka-SemiBold",
+        fontSize: RFValue(22),
         color: colors.textBlack,
-        marginBottom: hp("2%"),
+        marginBottom: hp("0.5%"),
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center"
     },
     circularProgressContainer: {
         marginVertical: hp("2%"),

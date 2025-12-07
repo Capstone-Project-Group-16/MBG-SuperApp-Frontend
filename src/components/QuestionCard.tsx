@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   optionButton: {
     paddingVertical: hp("1.8%"),
     paddingHorizontal: wp("4%"),
-    backgroundColor: colors.active,
+    backgroundColor: colors.brandGrey,
     borderRadius: wp("3%"),
     borderWidth: 1.5,
     borderColor: "transparent",
@@ -69,5 +69,5 @@ const styles = StyleSheet.create({
     borderColor: colors.brandGreen,
   },
   optionText: { fontFamily: "Jost", fontSize: RFValue(14), color: colors.textBlack },
-  optionTextSelected: { color: colors.white, fontFamily: "Fredoka-SemiBold" },
+  optionTextSelected: { color: colors.white, fontFamily: "Jost" },
 })

@@ -4,29 +4,31 @@ import { StatusBar } from "react-native"
 import { useFonts } from "expo-font";
 import SplashScreen from "./src/screen/SplashScreen"
 import SignIn from "./src/screen/SignIn"
-import SignUp from "./src/screen/SignUp"
 import Home from "./src/screen/Home"
 import FoodCustomizer from "./src/screen/FoodCustomizer"
 import FoodOrder from "./src/screen/FoodOrder"
 import FoodScanner from "./src/screen/FoodScanner";
-import NutritionAnalysis from "./src/screen/NutritionAnalysis";
+import NutritionFacts from "./src/screen/NutritionFacts";
 import FoodWaste from "./src/screen/FoodWaste";
 import MBGQuiz from "./src/screen/MBGQuiz";
-import QuizResult from "./src/screen/QuizResult"; 
+import QuizResult from "./src/screen/QuizResult";
+import DistributionTracker from "./src/screen/DistributionTracker";
+import Leaderboard from "./src/screen/Leaderboard";
 import "react-native-gesture-handler";
 
 export type RootStackParamList = {
   SplashScreen: undefined
   SignIn: undefined
-  SignUp: undefined
   Home: undefined
   FoodCustomizer: undefined
-  FoodOrder: { selectedItems: string[]}
-  FoodScanner: { scanMode?: "nutrition" | "waste" }
-  NutritionAnalysis: undefined
+  FoodOrder: { selectedFoods: { id: string; label: string; icon: any }[] }
+  FoodScanner: { scanMode?: "distribution" | "waste" }
+  NutritionFacts: undefined
   FoodWaste: undefined
   MBGQuiz: undefined
   QuizResult: { score: number; correct: number; incorrect: number; xp: number; gems: number }
+  DistributionTracker: undefined
+  Leaderboard: undefined
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -36,7 +38,7 @@ const navTheme: Theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: "#F3FFE9", 
+    background: "#F3FFE9",
     card: "#F3FFE9",
     text: "#111111",
     border: "#6BB36F",
@@ -55,8 +57,9 @@ export default function App() {
     "Jost": require("./assets/font/jost/Jost-VariableFont_wght.ttf"),
     "Jost-Medium": require("./assets/font/jost/static/Jost-Medium.ttf"),
     "Jost-SemiBold": require("./assets/font/jost/static/Jost-SemiBold.ttf"),
+    "Jost-Bold": require("./assets/font/jost/static/Jost-Bold.ttf"),
   });
-  
+
   return (
     <NavigationContainer theme={navTheme}>
       <StatusBar barStyle="dark-content" />
@@ -68,15 +71,16 @@ export default function App() {
       >
         <Stack.Screen name="SplashScreen" component={SplashScreen} />
         <Stack.Screen name="SignIn" component={SignIn} />
-        <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="FoodCustomizer" component={FoodCustomizer} />
         <Stack.Screen name="FoodOrder" component={FoodOrder} />
         <Stack.Screen name="FoodScanner" component={FoodScanner} />
-        <Stack.Screen name="NutritionAnalysis" component={NutritionAnalysis} />
+        <Stack.Screen name="NutritionFacts" component={NutritionFacts} />
         <Stack.Screen name="FoodWaste" component={FoodWaste} />
         <Stack.Screen name="MBGQuiz" component={MBGQuiz} />
         <Stack.Screen name="QuizResult" component={QuizResult} />
+        <Stack.Screen name="DistributionTracker" component={DistributionTracker} />
+        <Stack.Screen name="Leaderboard" component={Leaderboard} />
       </Stack.Navigator>
     </NavigationContainer>
   )

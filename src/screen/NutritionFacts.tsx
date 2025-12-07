@@ -9,22 +9,20 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-nat
 import { RFValue } from "react-native-responsive-fontsize"
 import { useState } from "react"
 
-type Props = NativeStackScreenProps<RootStackParamList, "NutritionAnalysis">
+type Props = NativeStackScreenProps<RootStackParamList, "NutritionFacts">
 
-export default function NutritionAnalysis({ navigation }: Props) {
+export default function NutritionFacts({ navigation }: Props) {
     const [nutritionData] = useState({
-        calorieConsumed: 568,
+        calorieConsumed: 1000,
         calorieLimit: 2400,
         nutrients: [
-            { label: "Carbohydrate", value: 20, unit: "gm", color: colors.nutriOrange },
+            { label: "Carbohydrate", value: 30, unit: "gm", color: colors.nutriOrange },
             { label: "Protein", value: 20, unit: "gm", color: colors.nutriBlue },
-            { label: "Fats", value: 20, unit: "gm", color: colors.nutriYellow },
-            { label: "Fibers", value: 20, unit: "gm", color: colors.nutriGreen },
-            { label: "Sugar", value: 20, unit: "gm", color: colors.nutriPink },
+            { label: "Fats", value: 15, unit: "gm", color: colors.nutriYellow },
+            { label: "Fibers", value: 25, unit: "gm", color: colors.nutriGreen },
+            { label: "Sugar", value: 15, unit: "gm", color: colors.nutriPink },
         ],
     })
-
-    const caloriePercentage = (nutritionData.calorieConsumed / nutritionData.calorieLimit) * 100
 
     return (
         <SafeAreaView style={styles.root}>
@@ -36,25 +34,25 @@ export default function NutritionAnalysis({ navigation }: Props) {
                 <View style={{ flex: 1 }} />
                 <StatusBar
                     items={[
-                        { label: "Energy", icon: require("../../assets/icon/thunder.png"), value: "70000", textColor: colors.textGold },
-                        { label: "Hearts", icon: require("../../assets/icon/diamond.png"), value: "70000", textColor: colors.textBlue },
+                        { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: "70000", textColor: colors.textGold },
+                        { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: "70000", textColor: colors.textBlue },
                     ]}
                 />
             </View>
 
-            <Text style={styles.title}>Nutrition Analysis</Text>
+            <Text style={styles.title}>Nutrition Facts</Text>
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 {/* Calorie Circle */}
                 <View style={styles.container}>
                     <CircularProgress
-                        value={568}
-                        max={2400}
+                        value={nutritionData.calorieConsumed}
+                        max={nutritionData.calorieLimit}
                         unit="KCal"
-                        gradientColors={["#FFE999", "#FF9C4A"]}
-                        backgroundColor="#FFF4D2"
-                        sizePercent={50}
-                        strokePercent={6}
+                        gradientColors={[colors.gradDarkOrange, colors.gradLightOrange]}
+                        backgroundColor={colors.bgOrange}
+                        sizePercent={55}
+                        strokePercent={8}
                         valueFontSize={RFValue(18)}
                         unitFontSize={RFValue(18)}
                     />
@@ -85,13 +83,13 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "center",
-        gap: wp("2.5%"),
-        marginTop: hp("1.25%"),
         paddingHorizontal: wp("4%"),
+        marginTop: hp("1.25%"),
         paddingTop: hp("4%"),
+        gap: wp("3%"),
     },
     close: { paddingVertical: hp("1%"), paddingHorizontal: wp("1%") },
-    closeIcon: { width: wp("6%"), height: wp("6%"), marginBottom: hp("0.5%") },
+    closeIcon: { width: wp("6%"), height: wp("6%"), marginBottom: hp("0.5%"), tintColor: colors.brandBorder },
     title: {
         fontFamily: "Fredoka-SemiBold",
         fontSize: RFValue(22),
