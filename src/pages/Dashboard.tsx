@@ -50,17 +50,27 @@ const MapPreview = styled.img`
   cursor: pointer;
 `;
 
-const CheckMapText = styled.div`
-  font-size: 22px;
-  font-weight: 600;
-  margin-top: 15px;
-  color: black;
-`;
-
 const TopRow = styled.div`
   display: flex;
   gap: 25px;
   margin-top: 25px;
+`;
+
+const TableHeader = styled.div`
+  width: 100%;
+  background: #E5FFE6;
+  border: 1px solid #8AA18D;
+  border-radius: 30px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+  font-weight: 600;
+  color: black;
+  margin-bottom: 18px;
 `;
 
 const NutritionCard = styled.div`
@@ -71,13 +81,6 @@ const NutritionCard = styled.div`
   padding: 20px 25px;
   color: black;
   height: fit-content;
-`;
-
-const NutritionTitle = styled.div`
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 15px;
-  color: black;
 `;
 
 const BarWrapper = styled.div`
@@ -101,11 +104,11 @@ const BarBackground = styled.div`
   background: #e8e8e8;
 `;
 
-const BarFill = styled.div<{ width: string }>`
+const BarFill = styled.div<{ width: string; color: string }>`
   height: 100%;
   border-radius: 10px;
   width: ${(props) => props.width};
-  background: linear-gradient(90deg, #45a246, #79d279);
+  background: ${(props) => props.color};
 `;
 
 const SectionRow = styled.div`
@@ -120,13 +123,6 @@ const CardLarge = styled.div`
   border-radius: 30px;
   border: 2px solid rgba(69, 162, 70, 0.5);
   padding: 20px 25px;
-  color: black;
-`;
-
-const SectionTitle = styled.div`
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 15px;
   color: black;
 `;
 
@@ -153,10 +149,12 @@ const FavMenuCard = styled.div`
   padding: 16px 20px;
   margin-bottom: 12px;
   color: black;
+
   display: flex;
-  justify-content: space-between;
-  font-size: 16px;
+  flex-direction: column;
+  gap: 6px;
 `;
+
 
 const StatLabel = styled.div`
   font-size: 15px;
@@ -215,7 +213,7 @@ export default function Dashboard() {
           {/* Map + Average Nutrition Row */}
           <TopRow>
             <div style={{ flex: 1 }}>
-            <CheckMapText>Check the Map</CheckMapText>
+            <TableHeader>Check the Map</TableHeader>
               <Link to="/tracker">
                 <MapPreview src={MapImage} alt="Map Preview" />
               </Link>
@@ -223,70 +221,93 @@ export default function Dashboard() {
 
             {/* AVERAGE NUTRITION CARD */}
             <NutritionCard>
-              <NutritionTitle>Average Nutrition %</NutritionTitle>
+              <TableHeader>Average Nutrition %</TableHeader>
 
               <BarWrapper>
+
                 <BarRow>
-                  <BarLabel>Calories – 78%</BarLabel>
+                  <BarLabel>Potassium – 70%</BarLabel>
                   <BarBackground>
-                    <BarFill width="78%" />
+                    <BarFill width="70%" color="#C070FF" />
                   </BarBackground>
                 </BarRow>
 
                 <BarRow>
-                  <BarLabel>Protein – 65%</BarLabel>
+                  <BarLabel>Calcium – 65%</BarLabel>
                   <BarBackground>
-                    <BarFill width="65%" />
+                    <BarFill width="65%" color="#67D4FF" />
                   </BarBackground>
                 </BarRow>
 
                 <BarRow>
-                  <BarLabel>Carbohydrates – 82%</BarLabel>
+                  <BarLabel>Iron (Zat Besi) – 58%</BarLabel>
                   <BarBackground>
-                    <BarFill width="82%" />
+                    <BarFill width="58%" color="#A05A2C" />
                   </BarBackground>
                 </BarRow>
 
                 <BarRow>
-                  <BarLabel>Vitamins – 74%</BarLabel>
+                  <BarLabel>Vitamin A – 82%</BarLabel>
                   <BarBackground>
-                    <BarFill width="74%" />
+                    <BarFill width="82%" color="#FFC447" />
                   </BarBackground>
                 </BarRow>
+
+                <BarRow>
+                  <BarLabel>Vitamin C – 75%</BarLabel>
+                  <BarBackground>
+                    <BarFill width="75%" color="#A8FF3A" />
+                  </BarBackground>
+                </BarRow>
+
+                <BarRow>
+                  <BarLabel>Vitamin D – 68%</BarLabel>
+                  <BarBackground>
+                    <BarFill width="68%" color="#FFF2A6" />
+                  </BarBackground>
+                </BarRow>
+
+                <BarRow>
+                  <BarLabel>Magnesium – 60%</BarLabel>
+                  <BarBackground>
+                    <BarFill width="60%" color="#7A90A4" />
+                  </BarBackground>
+                </BarRow>
+
               </BarWrapper>
             </NutritionCard>
+
           </TopRow>
 
           <SectionRow>
 
             {/* Recent Activity */}
             <CardLarge>
-              <SectionTitle>Recent Activities</SectionTitle>
+              <TableHeader>Recent Activities</TableHeader>
               {/* Placeholder API */}
               <ActivityBox>No recent activity yet.</ActivityBox>
             </CardLarge>
 
             {/* Favorite Menu */}
             <CardLarge>
-              <SectionTitle>
-                Favorite Menu per Week
-              </SectionTitle>
-{/* harusnya disini placeholder API karena nerima data berapa banyak yang mesen */}
-              <FavMenuCard>
-                <div>Ultimate Hero Feast</div>
-                <div>Total pesanan: </div>
-              </FavMenuCard>
+            <TableHeader>Favorite Menu per Week</TableHeader>
 
-              <FavMenuCard>
-                <div>Speed Runner Combo</div>
-                <div>Total pesanan: </div>
-              </FavMenuCard>
+            {/* harusnya bagian ini udah kesambung ke backend , tapi masih hardcoded */}
+            <FavMenuCard>
+              <div style={{ fontWeight: 600, fontSize: "17px" }}>Ultimate Hero Feast</div>
+              <div style={{ opacity: 0.8 }}>Total pesanan: -</div>
+            </FavMenuCard>
 
-            </CardLarge>
+            <FavMenuCard>
+              <div style={{ fontWeight: 600, fontSize: "17px" }}>Speed Runner Combo</div>
+              <div style={{ opacity: 0.8 }}>Total pesanan: -</div>
+            </FavMenuCard>
+          </CardLarge>
+
           </SectionRow>
 
           <CardLarge style={{ marginTop: "35px" }}>
-            <SectionTitle>This Week's Statistic</SectionTitle>
+            <TableHeader>This Week's Statistic</TableHeader>
 
             <StatsRow>
 
