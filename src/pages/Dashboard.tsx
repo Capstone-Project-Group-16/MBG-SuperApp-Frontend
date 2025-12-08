@@ -7,12 +7,12 @@ import DistributionImg from "../fe-assets/distribution.png";
 
 const PageWrapper = styled.div`
   width: 100vw;
-  height: 100v;
+  height: 100vh;
   background: #fef7ff;
   display: flex;
   flex-direction: column;
   color: black;
-  overflow: hidden;
+  overflow-y: auto;
 `;
 
 const ContentWrapper = styled.div`
@@ -28,7 +28,8 @@ const MainContent = styled.div`
   color: black;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 `;
 
 const Title = styled.h1`
