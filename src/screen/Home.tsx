@@ -1,5 +1,6 @@
 "use client"
 
+import React, { useEffect, useState } from "react"
 import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
@@ -9,22 +10,62 @@ import { colors } from "../theme/Color"
 import StatusBar from "../components/StatusBar"
 import FeatureCard from "../components/FeatureCard"
 import NavBar from "../components/NavBar"
+import { apiFetch } from "../lib/api";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">
 
-export default function HomeScreen({ navigation }: Props) {
+export default function HomeScreen({ navigation, route }: Props) {
+  const studentProfileId = route?.params?.studentProfileId
+
+  const [userName, setUserName] = useState<string>("Loading...")
+  const [avatarLetter, setAvatarLetter] = useState<string>("?")
+  const [exp, setExp] = useState<string>("0")
+  const [gems, setGems] = useState<string>("0")
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!studentProfileId) {
+        console.warn("studentProfileId tidak ada di route params")
+        return
+      }
+
+      try {
+        const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
+          method: "GET",
+        })
+
+        if (!res.ok) {
+          console.log("Gagal fetch student profile:", data)
+          return
+        }
+
+        const fullName: string = data?.user?.userFullName || "Student"
+        const firstLetter = fullName.charAt(0).toUpperCase()
+
+        setUserName(fullName)
+        setAvatarLetter(firstLetter)
+        setExp(String(data?.expPoints ?? "0"))
+        setGems(String(data?.mbgPoints ?? "0")) 
+      } catch (err) {
+        console.log("Error fetch student profile:", err)
+      }
+    }
+
+    loadProfile()
+  }, [studentProfileId])
+  
   return (
     <SafeAreaView style={styles.root}>
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarLetter}>E</Text>
+          <Text style={styles.avatarLetter}>{avatarLetter}</Text>
         </View>
-        <Text style={styles.userName}>Erina</Text>
+        <Text style={styles.userName}>{userName}</Text>
         <View style={{ flex: 1 }} />
         <StatusBar
           items={[
-            { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: "70000", textColor: colors.textGold },
-            { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: "70000", textColor: colors.textBlue },
+            { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: exp, textColor: colors.textGold },
+            { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: gems, textColor: colors.textBlue },
           ]}
         />
       </View>

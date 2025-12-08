@@ -10,6 +10,8 @@ import { colors } from "../theme/Color"
 import Logo from "../components/Logo"
 import { FormField } from "../components/FormField"
 import Button from "../components/Button"
+import { apiFetch } from "../lib/api";
+
 
 type Props = NativeStackScreenProps<RootStackParamList, "SignIn">
 
@@ -18,37 +20,47 @@ export default function SignInScreen({ navigation }: Props) {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
-  const onSignIn = async () => {
+
+const onSignIn = async () => {
   if (!email || !password) {
     Alert.alert("Error", "Email dan password harus diisi");
     return;
   }
 
   try {
-    const res = await fetch("http://192.168.1.9:8000/api/account/auth/login", {
+    const { res, data } = await apiFetch("/api/account/auth/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({
         userEmail: email,
         userPassword: password,
       }),
     });
 
-    const data = await res.json();
+    console.log("LOGIN RESPONSE:", data);
+    console.log("studentProfileId (from login):", data?.studentProfileId);
 
     if (!res.ok) {
-      Alert.alert("Login Failed", data.detail || "Invalid credentials");
+      if (res.status === 401) {
+        Alert.alert("Login Failed", data?.detail || "Invalid credentials");
+      } else if (res.status >= 500) {
+        Alert.alert("Internal Server Error", "Terjadi kesalahan server");
+      } else {
+        Alert.alert("Login Failed", data?.detail || "Terjadi kesalahan");
+      }
+      return;
+    }
+    
+    const studentProfileId = data.studentProfileId;
+
+    if (!studentProfileId) {
+      Alert.alert("Error", "Tidak bisa menemukan profil siswa dari response login.");
       return;
     }
 
-    console.log("LOGIN SUCCESS:", data);
-
     Alert.alert("Success", "Login berhasil!");
-    (navigation as any).replace("Home");
+    (navigation as any).replace("Home", { studentProfileId });
   } catch (error) {
-    console.log(error);
+    console.log("Network error:", error);
     Alert.alert("Network Error", "Tidak bisa terhubung ke server");
   }
 };

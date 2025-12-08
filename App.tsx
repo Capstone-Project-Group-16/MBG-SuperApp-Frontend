@@ -19,7 +19,7 @@ import "react-native-gesture-handler";
 export type RootStackParamList = {
   SplashScreen: undefined
   SignIn: undefined
-  Home: undefined
+  Home: { studentProfileId: number }
   FoodCustomizer: undefined
   FoodOrder: { selectedFoods: { id: string; label: string; icon: any }[] }
   FoodScanner: { scanMode?: "distribution" | "waste" }

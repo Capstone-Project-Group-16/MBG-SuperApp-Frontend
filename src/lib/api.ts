@@ -1,8 +1,29 @@
-/*import axios from "axios";
+import { Platform } from "react-native";
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api",
-  withCredentials: true,
-});
+const DEFAULT_LOCAL_BASE_URL =
+  Platform.OS === "web"
+    ? "http://localhost:8000"      
+    : "http://192.168.1.178:8000";   
 
-export default api;*/
+export const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_LOCAL_BASE_URL;
+
+
+export async function apiFetch(path: string, options: RequestInit = {}) {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    ...options,
+  });
+
+  let data: any = null;
+  try {
+    data = await res.json();
+  } catch (e) {
+    console.log("Gagal parse JSON dari", path, e);
+  }
+
+  return { res, data };
+}
