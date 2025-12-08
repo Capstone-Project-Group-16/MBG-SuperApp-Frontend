@@ -69,7 +69,6 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         <SidebarItem onClick={() => navigate("/dashboard")}>Dashboard</SidebarItem>
         <SidebarItem onClick={() => navigate("/tracker")}>Distribution Tracker</SidebarItem>
         <SidebarItem onClick={() => navigate("/statistic")}>Distribution Statistic</SidebarItem>
-        <SidebarItem onClick={() => navigate("/report")}>Report</SidebarItem>
         <SidebarItem onClick={() => navigate("/logout")}>Log Out</SidebarItem>
       </SidebarWrapper>
     </>

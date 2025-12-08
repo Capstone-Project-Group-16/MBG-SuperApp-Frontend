@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import MapImage from "../fe-assets/map.png";
+import DistributionImg from "../fe-assets/distribution.png";
 
 const PageWrapper = styled.div`
   width: 100vw;
@@ -13,19 +13,23 @@ const PageWrapper = styled.div`
   flex-direction: column;
   font-family: Fredoka;
   color: black;
+  overflow: hidden;
 `;
 
 const ContentWrapper = styled.div`
   display: flex;
   width: 100%;
-  margin-top: 90px; 
+  margin-top: 35px;
 `;
 
 const MainContent = styled.div`
   flex: 1;
-  padding: 40px 60px;
-  margin-left: 160px;
+  padding: 40px;
+  margin-left: 20px;
   color: black;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 `;
 
 const Title = styled.h1`
@@ -34,24 +38,78 @@ const Title = styled.h1`
   color: black;
 `;
 
-// const SubTitle = styled.h2`
-//   font-size: 28px;
-//   font-weight: 600;
-//   margin-top: 25px;
-//   color: black;
-// `;
-
-const MapPreview = styled.img`
-  width: 100%;
-  max-width: 650px;
-  margin-top: 20px;
-  border-radius: 12px;
-  border: 1px solid #3f3f3f;
-  cursor: pointer;
+const SubText = styled.div`
+  font-size: 20px;
+  opacity: 0.8;
 `;
+
+// check the distribution ---
+const DistributionCard = styled.div`
+  width: 32%;
+  background: white;
+  border-radius: 30px;
+  border: 2px solid rgba(69, 162, 70, 0.5);
+  padding: 20px 25px;
+  color: black;
+  height: fit-content;
+`;
+
+const DistributionHeader = styled.div`
+  width: 92%;
+  background: #e5ffe6;
+  border: 1px solid #8aa18d;
+  border-radius: 30px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  font-size: 22px;
+  font-weight: 600;
+  color: black;
+  padding: 0 20px;
+  margin-bottom: 18px;
+`;
+
+const ArrowButton = styled(Link)`
+  font-size: 26px;
+  font-weight: bold;
+  color: #45a246;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const DistributionImage = styled.img`
+  width: 55%;
+  max-width: 150px;
+  margin: 0 auto;
+  display: block;
+  margin-bottom: 18px;
+`;
+
+const DistributionItem = styled.div`
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #45a246;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  color: black;
+
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+`;
+// ---
 
 const TopRow = styled.div`
   display: flex;
+  justify-content: center; 
+  width: 100%;
   gap: 25px;
   margin-top: 25px;
 `;
@@ -73,8 +131,9 @@ const TableHeader = styled.div`
   margin-bottom: 18px;
 `;
 
+// average nutrition ---
 const NutritionCard = styled.div`
-  flex: 0.8;
+  width: 32%;
   background: white;
   border-radius: 30px;
   border: 2px solid rgba(69, 162, 70, 0.5);
@@ -110,6 +169,32 @@ const BarFill = styled.div<{ width: string; color: string }>`
   width: ${(props) => props.width};
   background: ${(props) => props.color};
 `;
+// ---
+
+// favorite menu ---
+const FavoriteMenuLarge = styled.div`
+  width: 32%;
+  background: white;
+  border-radius: 30px;
+  border: 2px solid rgba(69, 162, 70, 0.5);
+  padding: 20px 25px;
+  color: black;
+  height: fit-content;
+`;
+
+const FavMenuCard = styled.div`
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #45a246;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  color: black;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+// ---
 
 const SectionRow = styled.div`
   display: flex;
@@ -126,35 +211,12 @@ const CardLarge = styled.div`
   color: black;
 `;
 
-const ActivityBox = styled.div`
-  background: white;
-  border-radius: 20px;
-  border: 1px solid #45a246;
-  padding: 12px 16px;
-  margin-bottom: 12px;
-  color: black;
-`;
-
 // const TimeStamp = styled.div`
 //   font-size: 10px;
 //   margin-top: 4px;
 //   opacity: 0.7;
 //   color: black;
 // `;
-
-const FavMenuCard = styled.div`
-  background: white;
-  border-radius: 20px;
-  border: 1px solid #45a246;
-  padding: 16px 20px;
-  margin-bottom: 12px;
-  color: black;
-
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-`;
-
 
 const StatLabel = styled.div`
   font-size: 15px;
@@ -209,19 +271,44 @@ export default function Dashboard() {
 
         <MainContent>
           <Title>Welcome, Government</Title>
+          <SubText>Apa yang bisa kami bantu hari ini?</SubText>
 
-          {/* Map + Average Nutrition Row */}
+          {/* Check distribution */}
           <TopRow>
-            <div style={{ flex: 1 }}>
-            <TableHeader>Check the Map</TableHeader>
-              <Link to="/tracker">
-                <MapPreview src={MapImage} alt="Map Preview" />
-              </Link>
-            </div>
+            <DistributionCard>
+              <DistributionHeader>
+                Check Distribution
+                <ArrowButton to="/tracker">→</ArrowButton>
+              </DistributionHeader>
+
+              <DistributionImage src={DistributionImg} alt="Distribution" />
+
+              {/* recent activity masih hardcode, integrasi be-fe disini */}
+              <DistributionItem>
+                <span>10 school orders in Depok are currently on delivery</span>
+                <span style={{ opacity: 0.7, fontSize: "12px" }}>09:00 AM</span>
+              </DistributionItem>
+            </DistributionCard>
+
+            {/* FAVORITE MENU PER WEEK */}
+            <FavoriteMenuLarge>
+              <TableHeader>Favorite Menu per Week</TableHeader>
+
+            {/* masih hardcoded, sambung bagian ini ke backend */}
+            <FavMenuCard>
+              <div style={{ fontWeight: 600, fontSize: "17px" }}>Ultimate Hero Feast</div>
+              <div style={{ opacity: 0.8 }}>Total pesanan: -</div>
+            </FavMenuCard>
+
+            <FavMenuCard>
+              <div style={{ fontWeight: 600, fontSize: "17px" }}>Speed Runner Combo</div>
+              <div style={{ opacity: 0.8 }}>Total pesanan: -</div>
+            </FavMenuCard>
+            </FavoriteMenuLarge>
 
             {/* AVERAGE NUTRITION CARD */}
             <NutritionCard>
-              <TableHeader>Average Nutrition %</TableHeader>
+              <TableHeader>Average Nutrition</TableHeader>
 
               <BarWrapper>
 
@@ -276,35 +363,9 @@ export default function Dashboard() {
 
               </BarWrapper>
             </NutritionCard>
-
           </TopRow>
 
-          <SectionRow>
-
-            {/* Recent Activity */}
-            <CardLarge>
-              <TableHeader>Recent Activities</TableHeader>
-              {/* Placeholder API */}
-              <ActivityBox>No recent activity yet.</ActivityBox>
-            </CardLarge>
-
-            {/* Favorite Menu */}
-            <CardLarge>
-            <TableHeader>Favorite Menu per Week</TableHeader>
-
-            {/* harusnya bagian ini udah kesambung ke backend , tapi masih hardcoded */}
-            <FavMenuCard>
-              <div style={{ fontWeight: 600, fontSize: "17px" }}>Ultimate Hero Feast</div>
-              <div style={{ opacity: 0.8 }}>Total pesanan: -</div>
-            </FavMenuCard>
-
-            <FavMenuCard>
-              <div style={{ fontWeight: 600, fontSize: "17px" }}>Speed Runner Combo</div>
-              <div style={{ opacity: 0.8 }}>Total pesanan: -</div>
-            </FavMenuCard>
-          </CardLarge>
-
-          </SectionRow>
+          <SectionRow></SectionRow>
 
           <CardLarge style={{ marginTop: "35px" }}>
             <TableHeader>This Week's Statistic</TableHeader>
@@ -315,21 +376,21 @@ export default function Dashboard() {
                 <SmallStatCard>
                 <StatLabel>Total Hasil Distribusi</StatLabel>
                 {/* API: total hasil distribusi */}
-                <StatValue>-</StatValue>
+                <StatValue>0</StatValue>
                 </SmallStatCard>
 
                 {/* Total sekolah */}
                 <SmallStatCard>
                 <StatLabel>Total Sekolah per Kota yang Sudah Menerima MBG</StatLabel>
                 {/* API: total sekolah */}
-                <StatValue>-</StatValue>
+                <StatValue>0</StatValue>
                 </SmallStatCard>
 
                 {/* Kota tertunda */}
                 <SmallStatCard>
                 <StatLabel>Kota Tertunda atau Gagal</StatLabel>
                 {/* API: kota tertunda/gagal */}
-                <StatValue>-</StatValue>
+                <StatValue></StatValue>
                 </SmallStatCard>
 
             </StatsRow>
