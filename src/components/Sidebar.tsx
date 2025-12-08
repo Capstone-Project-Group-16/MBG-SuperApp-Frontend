@@ -20,6 +20,7 @@ const SidebarItem = styled.div`
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
+  color: black;
   border-bottom: 1px solid #cfd8d0;
 
   &:hover {

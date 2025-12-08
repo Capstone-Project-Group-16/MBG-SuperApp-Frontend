@@ -11,7 +11,6 @@ const PageWrapper = styled.div`
   background: #fef7ff;
   display: flex;
   flex-direction: column;
-  font-family: Fredoka;
   color: black;
   overflow: hidden;
 `;
@@ -34,7 +33,7 @@ const MainContent = styled.div`
 
 const Title = styled.h1`
   font-size: 32px;
-  font-weight: 600;
+  font-weight: 700;
   color: black;
 `;
 
@@ -66,7 +65,7 @@ const DistributionHeader = styled.div`
   justify-content: space-between;
 
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 700;
   color: black;
   padding: 0 20px;
   margin-bottom: 18px;
@@ -126,7 +125,7 @@ const TableHeader = styled.div`
   justify-content: center;
 
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 700;
   color: black;
   margin-bottom: 18px;
 `;
@@ -390,7 +389,7 @@ export default function Dashboard() {
                 <SmallStatCard>
                 <StatLabel>Kota Tertunda atau Gagal</StatLabel>
                 {/* API: kota tertunda/gagal */}
-                <StatValue></StatValue>
+                <StatValue>0</StatValue>
                 </SmallStatCard>
 
             </StatsRow>

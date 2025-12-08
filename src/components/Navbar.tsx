@@ -37,7 +37,6 @@ const NavLinks = styled.div`
 `;
 
 const NavItem = styled(Link)`
-  font-family: "Fredoka", sans-serif;
   font-size: 20px;
   font-weight: 700;
   color: black;
@@ -45,6 +44,7 @@ const NavItem = styled(Link)`
 
   &:hover {
     opacity: 0.7;
+    color: #797979ff;
   }
 `;
 
@@ -61,9 +61,9 @@ const ProfileImg = styled.img`
 
 const UsernameText = styled.span`
   margin-right: 12px;
-  font-family: "Fredoka";
   font-size: 20px;
   font-weight: 700;
+  color: black;
 `;
 
 const Navbar: React.FC = () => {
@@ -74,8 +74,8 @@ const Navbar: React.FC = () => {
       </LeftSection>
 
       <NavLinks>
-        <NavItem to="/dashboard">HOME</NavItem>
-        <NavItem to="/about">ABOUT</NavItem>
+        <NavItem to="/dashboard">Home</NavItem>
+        <NavItem to="/about">About</NavItem>
       </NavLinks>
 
       <RightSection>
