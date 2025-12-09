@@ -2,10 +2,14 @@ import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Image } fr
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
+import StatusBar from "../components/StatusBar"
 import TopWinner from "../components/TopWinner"
 import LeaderboardList from "../components/LeaderboardList"
+import NavBar from "../components/NavBar"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFValue } from "react-native-responsive-fontsize"
+import { useEffect, useState } from "react"
+import { apiFetch } from "../lib/api";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Leaderboard">
 
@@ -20,16 +24,54 @@ const leaderboardData = [
   { rank: 8, name: "Full Name", xp: "9300 XP" },
   { rank: 9, name: "Full Name", xp: "9200 XP" },
   { rank: 10, name: "Full Name", xp: "9100 XP" },
-  { rank: 16, name: "Full Name", xp: "8500 XP" },
 ]
 
-export default function Leaderboard({ navigation }: Props) {
+export default function Leaderboard({ navigation, route }: Props) {
+  const studentProfileId = route?.params?.studentProfileId
+  const [exp, setExp] = useState<string>("0")
+  const [gems, setGems] = useState<string>("0")
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!studentProfileId) {
+        console.warn("studentProfileId tidak ada di route params")
+        return
+      }
+
+      try {
+        const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
+          method: "GET",
+        })
+
+        if (!res.ok) {
+          console.log("Gagal fetch student profile:", data)
+          return
+        }
+
+        setExp(String(data?.expPoints ?? "0"))
+        setGems(String(data?.mbgPoints ?? "0"))
+      } catch (err) {
+        console.log("Error fetch student profile:", err)
+      }
+    }
+
+    loadProfile()
+  }, [studentProfileId])
+
   return (
     <SafeAreaView style={styles.root}>
       <View style={styles.header}>
         <Pressable accessibilityRole="button" onPress={() => navigation.goBack()} style={styles.back}>
           <Image style={styles.backIcon} source={require("../../assets/icon/back.png")} resizeMode="contain" />
         </Pressable>
+
+        <View style={{ flex: 1 }} />
+        <StatusBar
+          items={[
+            { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: exp, textColor: colors.textGold },
+            { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: gems, textColor: colors.textBlue },
+          ]}
+        />
       </View>
 
       <Text style={styles.title}>Leaderboard</Text>
@@ -50,13 +92,21 @@ export default function Leaderboard({ navigation }: Props) {
               rank={item.rank}
               name={item.name}
               xp={item.xp}
-              isHighlighted={item.rank === 16}
             />
           ))}
         </View>
 
         <View style={{ height: hp("3%") }} />
       </ScrollView>
+
+      <NavBar
+        items={[
+          { label: "Home", icon: require("../../assets/icon/home.png"), onPress: () => navigation.navigate("Home", { studentProfileId }) },
+          { label: "Distribution Tracker", icon: require("../../assets/icon/distribution.png"), onPress: () => navigation.navigate("DistributionTracker", { studentProfileId }) },
+          { label: "Spin Wheel", icon: require("../../assets/icon/spin-wheel.png"), onPress: () => navigation.navigate("SpinWheel", { studentProfileId }), },
+          { label: "Leaderboard", icon: require("../../assets/icon/leaderboard.png"), active: true, onPress: () => { } },
+        ]}
+      />
     </SafeAreaView>
   )
 }
@@ -67,18 +117,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: wp("4%"),
-    paddingTop: hp("2%"),
-    paddingBottom: hp("1%"),
+    marginTop: hp("1.25%"),
+    paddingTop: hp("4%"),
+    gap: wp("3%"),
   },
   back: { paddingVertical: hp("1%"), paddingHorizontal: wp("1%") },
-  backIcon: { width: wp("6%"), height: wp("6%") },
+  backIcon: {
+    width: wp("6%"),
+    height: wp("6%"),
+    marginBottom: hp("0.5%"),
+    tintColor: colors.brandBorder
+  },
   title: {
     fontFamily: "Fredoka-SemiBold",
     fontSize: RFValue(22),
     color: colors.textBlack,
-    paddingHorizontal: wp("4%"),
-    marginBottom: hp("2.5%"),
-    textAlign: "center",
+    marginBottom: hp("2%"),
+    paddingTop: hp("1.5%"),
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center"
   },
   content: { paddingHorizontal: wp("4%") },
   topWinnersContainer: {

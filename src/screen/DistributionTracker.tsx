@@ -114,8 +114,8 @@ export default function DistributionTracker({ navigation, route }: Props) {
                 items={[
                     { label: "Home", icon: require("../../assets/icon/home.png"), onPress: () => navigation.navigate("Home", { studentProfileId }) },
                     { label: "Distribution Tracker", icon: require("../../assets/icon/distribution.png"), active: true, onPress: () => { } },
-                    { label: "Spin Wheel", icon: require("../../assets/icon/spin-wheel.png"), onPress: () => { } },
-                    { label: "Leaderboard", icon: require("../../assets/icon/leaderboard.png"), onPress: () => navigation.navigate("Leaderboard"), },
+                    { label: "Spin Wheel", icon: require("../../assets/icon/spin-wheel.png"), onPress: () => navigation.navigate("SpinWheel", { studentProfileId }), },
+                    { label: "Leaderboard", icon: require("../../assets/icon/leaderboard.png"), onPress: () => navigation.navigate("Leaderboard", { studentProfileId }), },
                 ]}
             />
         </SafeAreaView>

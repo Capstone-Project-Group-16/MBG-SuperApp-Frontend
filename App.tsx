@@ -13,6 +13,7 @@ import FoodWaste from "./src/screen/FoodWaste";
 import MBGQuiz from "./src/screen/MBGQuiz";
 import QuizResult from "./src/screen/QuizResult";
 import DistributionTracker from "./src/screen/DistributionTracker";
+import SpinWheel from "./src/screen/SpinWheel";
 import Leaderboard from "./src/screen/Leaderboard";
 import "react-native-gesture-handler";
 
@@ -28,7 +29,8 @@ export type RootStackParamList = {
   MBGQuiz: undefined
   QuizResult: { score: number; correct: number; incorrect: number; xp: number; gems: number }
   DistributionTracker: { studentProfileId: number }
-  Leaderboard: undefined
+  SpinWheel: { studentProfileId: number }
+  Leaderboard: { studentProfileId: number }
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -80,6 +82,7 @@ export default function App() {
         <Stack.Screen name="MBGQuiz" component={MBGQuiz} />
         <Stack.Screen name="QuizResult" component={QuizResult} />
         <Stack.Screen name="DistributionTracker" component={DistributionTracker} />
+        <Stack.Screen name="SpinWheel" component={SpinWheel} />
         <Stack.Screen name="Leaderboard" component={Leaderboard} />
       </Stack.Navigator>
     </NavigationContainer>
