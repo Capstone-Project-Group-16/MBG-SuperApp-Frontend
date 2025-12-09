@@ -20,7 +20,6 @@ export default function SignInScreen({ navigation }: Props) {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
-
 const onSignIn = async () => {
   if (!email || !password) {
     Alert.alert("Error", "Email dan password harus diisi");

@@ -16,7 +16,6 @@ type Props = NativeStackScreenProps<RootStackParamList, "Home">
 
 export default function HomeScreen({ navigation, route }: Props) {
   const studentProfileId = route?.params?.studentProfileId
-
   const [userName, setUserName] = useState<string>("Loading...")
   const [avatarLetter, setAvatarLetter] = useState<string>("?")
   const [exp, setExp] = useState<string>("0")
@@ -89,7 +88,7 @@ export default function HomeScreen({ navigation, route }: Props) {
           title="Food Waste"
           description="Foto piringmu, lihat seberapa jago kamu ngabisin makan!"
           icon={require("../../assets/icon/food-waste.png")}
-          onPress={() => navigation.navigate("FoodScanner", { scanMode: "waste" })}
+          onPress={() => navigation.navigate("FoodScanner", { studentProfileId, scanMode: "waste" })}
         />
         <View style={{ height: hp("3%") }} />
         <FeatureCard

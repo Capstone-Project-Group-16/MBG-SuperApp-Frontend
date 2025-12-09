@@ -22,9 +22,9 @@ export type RootStackParamList = {
   Home: { studentProfileId: number }
   FoodCustomizer: { studentProfileId: number }
   FoodOrder: { studentProfileId: number, menuId: string, menuTitle: string, price: string, tray: any }
-  FoodScanner: { scanMode?: "distribution" | "waste" }
+  FoodScanner: { studentProfileId: number, scanMode?: "distribution" | "waste" }
   NutritionFacts: undefined
-  FoodWaste: undefined
+  FoodWaste: { studentProfileId: number }
   MBGQuiz: undefined
   QuizResult: { score: number; correct: number; incorrect: number; xp: number; gems: number }
   DistributionTracker: { studentProfileId: number }

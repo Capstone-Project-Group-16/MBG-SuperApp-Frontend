@@ -1,20 +1,51 @@
 "use client"
 
 import { View, Text, StyleSheet, Pressable, SafeAreaView, TouchableOpacity, Image } from "react-native"
-import { useRef, useState } from "react"
+import { useRef, useEffect, useState } from "react"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { CameraView } from "expo-camera"
 import { colors } from "../theme/Color"
+import { apiFetch } from "../lib/api";
 
 type Props = NativeStackScreenProps<RootStackParamList, "FoodScanner">
 
 export default function FoodScanner({ navigation, route }: Props) {
+  const studentProfileId = route?.params?.studentProfileId
+  const [exp, setExp] = useState<string>("0")
+  const [gems, setGems] = useState<string>("0")
   const cameraRef = useRef<CameraView>(null)
   const [flashEnabled, setFlashEnabled] = useState(false)
-  const scanMode = route.params?.scanMode || "distribution" 
+  const scanMode = route.params?.scanMode || "distribution"
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!studentProfileId) {
+        console.warn("studentProfileId tidak ada di route params")
+        return
+      }
+
+      try {
+        const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
+          method: "GET",
+        })
+
+        if (!res.ok) {
+          console.log("Gagal fetch student profile:", data)
+          return
+        }
+
+        setExp(String(data?.expPoints ?? "0"))
+        setGems(String(data?.mbgPoints ?? "0"))
+      } catch (err) {
+        console.log("Error fetch student profile:", err)
+      }
+    }
+
+    loadProfile()
+  }, [studentProfileId])
 
   const toggleFlash = async () => {
     setFlashEnabled((prev) => !prev)
@@ -36,9 +67,9 @@ export default function FoodScanner({ navigation, route }: Props) {
 
   const handleScan = () => {
     if (scanMode === "waste") {
-      navigation.navigate("FoodWaste")
+      navigation.navigate("FoodWaste", { studentProfileId })
     } else {
-      navigation.navigate("DistributionTracker")
+      navigation.navigate("DistributionTracker", { studentProfileId })
     }
   }
 
@@ -52,7 +83,7 @@ export default function FoodScanner({ navigation, route }: Props) {
       >
         <View style={styles.header}>
           <Pressable accessibilityRole="button" onPress={() => navigation.goBack()} style={styles.back}>
-            <Image style={styles.backIcon} source={require("../../assets/icon/back.png")} resizeMode="contain"/>
+            <Image style={styles.backIcon} source={require("../../assets/icon/back.png")} resizeMode="contain" />
           </Pressable>
 
           <View style={{ flex: 1 }} />
@@ -111,7 +142,7 @@ const styles = StyleSheet.create({
   flashButtonActive: { backgroundColor: colors.white },
   flashIcon: { width: wp("8%"), height: wp("8%") },
   centerContent: { flex: 1, alignItems: "center", marginTop: hp("6%"), paddingHorizontal: wp("4%") },
-  title: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(28), color: colors.white, marginBottom: hp("5%")},
+  title: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(28), color: colors.white, marginBottom: hp("5%") },
   scannerFrame: {
     width: wp("80%"),
     height: hp("40%"),
@@ -136,7 +167,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: hp("2.5%"),
     fontFamily: "Jost",
-    opacity: 0.9, 
+    opacity: 0.9,
     lineHeight: 22
   },
   captureButton: {

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native"
+import { View, Text, StyleSheet, Image } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFValue } from "react-native-responsive-fontsize"
 import { colors } from "../theme/Color"
@@ -11,7 +11,7 @@ type Props = {
     id: string
     title: string
     description: string
-    foods: { id: string; label: string; icon?: any }[]
+    trayImage: any
   }
 }
 

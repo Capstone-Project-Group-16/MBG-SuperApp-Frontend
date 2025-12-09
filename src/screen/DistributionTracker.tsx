@@ -105,7 +105,7 @@ export default function DistributionTracker({ navigation, route }: Props) {
                     title="FOOD RECEIVED"
                     onPress={() => {
                         setCompletedIndex(timelineData.length)
-                        navigation.navigate("FoodScanner", { scanMode: "distribution", })
+                        navigation.navigate("FoodScanner", { studentProfileId, scanMode: "distribution" })
                     }}
                 />
             </View>

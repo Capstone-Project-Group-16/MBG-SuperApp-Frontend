@@ -7,11 +7,15 @@ import CircularProgress from "../components/CircularProgress"
 import SuggestionCard from "../components/SuggestionCard"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFValue } from "react-native-responsive-fontsize"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { apiFetch } from "../lib/api";
 
 type Props = NativeStackScreenProps<RootStackParamList, "FoodWaste">
 
-export default function FoodWaste({ navigation }: Props) {
+export default function FoodWaste({ route, navigation }: Props) {
+    const studentProfileId = route?.params?.studentProfileId
+    const [exp, setExp] = useState<string>("0")
+    const [gems, setGems] = useState<string>("0")
     const [wasteData] = useState({
         mealScore: 80,
         suggestion: "Mantap! Kamu sudah menghabiskan 80% makananmu. Teruskan kebiasaan baik ini agar tubuh sehat dan makanan tidak terbuang sia-sia!",
@@ -20,40 +24,55 @@ export default function FoodWaste({ navigation }: Props) {
                 id: "1",
                 title: "Ultimate Hero Feast",
                 description: "Santapan para pahlawan utama yang meningkatkan daya tahan tubuh",
-                foods: [
-                    { id: "1", label: "Milk", icon: require("../../assets/icon/menu/milk.png") },
-                    { id: "2", label: "Banana", icon: require("../../assets/icon/menu/banana.png") },
-                    { id: "3", label: "Broccoli", icon: require("../../assets/icon/menu/broccoli.png") },
-                    { id: "4", label: "Rice", icon: require("../../assets/icon/menu/rice.png") },
-                    { id: "5", label: "Chicken", icon: require("../../assets/icon/menu/chicken.png") },
-                ],
+                trayImage: require("../../assets/icon/ultimate-hero-feast.png"),
             },
             {
                 id: "2",
                 title: "Speed Runner Combo",
                 description: "Kombinasi makanan yang membuatmu bergerak cepat seperti kilat",
-                foods: [
-                    { id: "1", label: "Orange Juice", icon: require("../../assets/icon/menu/orange-juice.png") },
-                    { id: "2", label: "Watermelon", icon: require("../../assets/icon/menu/watermelon.png") },
-                    { id: "3", label: "Carrot", icon: require("../../assets/icon/menu/carrot.png") },
-                    { id: "4", label: "Rice", icon: require("../../assets/icon/menu/rice.png") },
-                    { id: "5", label: "Fish", icon: require("../../assets/icon/menu/fish.png") },
-                ],
+                trayImage: require("../../assets/icon/speed-runner-combo.png"),
             }
         ],
     })
 
+    useEffect(() => {
+        const loadProfile = async () => {
+            if (!studentProfileId) {
+                console.warn("studentProfileId tidak ada di route params")
+                return
+            }
+
+            try {
+                const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
+                    method: "GET",
+                })
+
+                if (!res.ok) {
+                    console.log("Gagal fetch student profile:", data)
+                    return
+                }
+
+                setExp(String(data?.expPoints ?? "0"))
+                setGems(String(data?.mbgPoints ?? "0"))
+            } catch (err) {
+                console.log("Error fetch student profile:", err)
+            }
+        }
+
+        loadProfile()
+    }, [studentProfileId])
+
     return (
         <SafeAreaView style={styles.root}>
             <View style={styles.header}>
-                <Pressable accessibilityRole="button" onPress={() => navigation.navigate("Home")} style={styles.close}>
+                <Pressable accessibilityRole="button" onPress={() => navigation.navigate("Home", { studentProfileId })} style={styles.close}>
                     <Image style={styles.closeIcon} source={require("../../assets/icon/close.png")} resizeMode="contain" />
                 </Pressable>
                 <View style={{ flex: 1 }} />
                 <StatusBar
                     items={[
-                        { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: "70000", textColor: colors.textGold },
-                        { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: "70000", textColor: colors.textBlue },
+                        { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: exp, textColor: colors.textGold },
+                        { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: gems, textColor: colors.textBlue },
                     ]}
                 />
             </View>
@@ -73,7 +92,7 @@ export default function FoodWaste({ navigation }: Props) {
                         valueFontSize={RFValue(30)}
                     />
                 </View>
-                
+
                 {/* Suggestion */}
                 <SuggestionCard label="Suggestion" text={wasteData.suggestion} />
 
@@ -120,5 +139,5 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     circleContainer: { alignItems: "center", marginBottom: hp("3%"), gap: hp("1.5%") },
-    sectionTitle: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(20), color: colors.textBlack, marginLeft: hp("1.5%")},
+    sectionTitle: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(20), color: colors.textBlack, marginLeft: hp("1.5%") },
 })
