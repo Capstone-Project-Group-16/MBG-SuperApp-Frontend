@@ -28,50 +28,19 @@ const SidebarItem = styled.div`
   }
 `;
 
-const BurgerButton = styled.button`
-  position: fixed;
-  top: 90px;
-  left: 0;
-  width: 40px;
-  height: 40px;
-  background: #8aa18d;
-  border: none;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  cursor: pointer;
-  z-index: 201;
-`;
-
-const BurgerBar = styled.div`
-  width: 24px;
-  height: 3px;
-  background: white;
-  margin: 5px 0;
-  border-radius: 3px;
-`;
-
 interface SidebarProps {
   open: boolean;
-  setOpen: (value: boolean) => void;
 }
 
-export default function Sidebar({ open, setOpen }: SidebarProps) {
+export default function Sidebar({ open }: SidebarProps) {
   const navigate = useNavigate();
 
   return (
-    <>
-      <BurgerButton onClick={() => setOpen(!open)}>
-        <BurgerBar />
-        <BurgerBar />
-        <BurgerBar />
-      </BurgerButton>
-
-      <SidebarWrapper open={open}>
-        <SidebarItem onClick={() => navigate("/dashboard")}>Dashboard</SidebarItem>
-        <SidebarItem onClick={() => navigate("/tracker")}>Distribution Tracker</SidebarItem>
-        <SidebarItem onClick={() => navigate("/statistic")}>Distribution Statistic</SidebarItem>
-        <SidebarItem onClick={() => navigate("/logout")}>Log Out</SidebarItem>
-      </SidebarWrapper>
-    </>
+    <SidebarWrapper open={open}>
+      <SidebarItem onClick={() => navigate("/dashboard")}>Dashboard</SidebarItem>
+      <SidebarItem onClick={() => navigate("/tracker")}>Distribution Tracker</SidebarItem>
+      <SidebarItem onClick={() => navigate("/statistic")}>Distribution Statistic</SidebarItem>
+      <SidebarItem onClick={() => navigate("/logout")}>Log Out</SidebarItem>
+    </SidebarWrapper>
   );
 }

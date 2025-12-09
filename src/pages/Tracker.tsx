@@ -586,10 +586,10 @@ export default function Tracker() {
 
   return (
     <PageWrapper>
-      <Navbar />
+      <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       <ContentWrapper>
-        <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+        <Sidebar open={sidebarOpen} />
 
         <MainContent>
           {renderHeader()}
