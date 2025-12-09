@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useAuth } from "../context/AuthContext";
 
 const SidebarWrapper = styled.div<{ open: boolean }>`
   position: fixed;
@@ -35,14 +36,12 @@ interface SidebarProps {
 
 export default function Sidebar({ open, setOpen: _setOpen }: SidebarProps) {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
-  // integrasi bagian ini juga
   const handleLogout = () => {
-  localStorage.removeItem("authToken");
-  localStorage.removeItem("userData");
-
-  navigate("/login");
-};
+    logout();
+    navigate("/login");
+  };
 
 
   return (

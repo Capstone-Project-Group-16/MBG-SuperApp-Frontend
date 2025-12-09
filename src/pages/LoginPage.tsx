@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import LogoImg from "../fe-assets/logo.png";
+import { useAuth } from "../context/AuthContext";
 
 const PageContainer = styled.div`
   width: 100vw;
@@ -86,24 +88,55 @@ const SignInButton = styled.button`
   border: none;
   cursor: pointer;
   margin-bottom: 20px;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
 
-const FooterText = styled.div`
-  font-family: Fredoka;
+const ErrorMessage = styled.div`
+  color: #d32f2f;
   font-size: 14px;
-  color: black;
-`;
-
-const SignUpLink = styled.span`
-  font-weight: 500;
-  text-decoration: underline;
-  cursor: pointer;
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: Fredoka;
+  word-wrap: break-word;
 `;
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login, isLoading } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const registrationLink = "https://forms.gle/6NUcPm8zaY5HxG6x7";
+  const handleSignIn = async () => {
+    setError("");
+
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    try {
+      await login(email, password);
+      navigate("/dashboard");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && email && password && !isLoading) {
+      handleSignIn();
+    }
+  };
 
   return (
     <PageContainer>
@@ -112,30 +145,37 @@ export default function LoginPage() {
 
         <Title>Sign in your account</Title>
 
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+
         <InputContainer>
           <Label>Email</Label>
-          <Input type="email"
-                placeholder="Enter your email"/>
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+          />
         </InputContainer>
 
         <InputContainer>
           <Label>Password</Label>
-          <Input type="password"
-                placeholder="Enter your password"/>
+          <Input
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+          />
         </InputContainer>
 
         {/* <ForgotPassword>Forgot password?</ForgotPassword> */}
 
-        <SignInButton onClick={() => navigate("/dashboard")}>
-          Sign In
-          </SignInButton>
-
-        <FooterText>
-          Don’t have an account?{" "}
-          <SignUpLink onClick={() => window.open(registrationLink, "_blank")}>
-            Register here
-          </SignUpLink>
-        </FooterText>
+        <SignInButton onClick={handleSignIn} disabled={isLoading}>
+          {isLoading ? "Signing in..." : "Sign In"}
+        </SignInButton>
       </Card>
     </PageContainer>
   );

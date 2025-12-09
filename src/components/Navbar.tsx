@@ -1,8 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Logo from "../fe-assets/logo.png";
 import ProfileIcon from "../fe-assets/profile.png";
+import { useAuth } from "../context/AuthContext";
 
 const NavbarContainer = styled.nav`
   width: 100vw;
@@ -94,11 +95,35 @@ const UsernameText = styled.span`
   color: black;
 `;
 
+const LogoutButton = styled.button`
+  margin-left: 12px;
+  padding: 8px 16px;
+  background: #8aa18d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
 interface NavbarProps {
   onToggleSidebar?: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <NavbarContainer>
       <LeftSection>
@@ -116,8 +141,9 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
       </NavLinks>
 
       <RightSection>
-        <UsernameText>User</UsernameText> {/* placeholder */}
-          <ProfileImg src={ProfileIcon} alt="User Profile" />
+        <UsernameText>{user?.userFullName || "User"}</UsernameText>
+        <ProfileImg src={ProfileIcon} alt="User Profile" />
+        <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
       </RightSection>
     </NavbarContainer>
   );
