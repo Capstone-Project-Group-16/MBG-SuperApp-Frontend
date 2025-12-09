@@ -1,21 +1,38 @@
 import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DEFAULT_LOCAL_BASE_URL =
   Platform.OS === "web"
     ? "http://localhost:8000"      
-    : "http://192.168.1.2:8000";   
+    : "http://192.168.1.178:8000";   
 
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_LOCAL_BASE_URL;
 
+type ApiOptions = RequestInit & {
+  skipAuth?: boolean;
+};
 
-export async function apiFetch(path: string, options: RequestInit = {}) {
+export async function apiFetch(path: string, options: ApiOptions = {}) {
+  const { skipAuth, headers, ...rest } = options;
+
+  let token: string | null = null;
+
+  if (!skipAuth) {
+    try {
+      token = await AsyncStorage.getItem("accessToken");
+    } catch (e) {
+      console.log("Gagal membaca accessToken dari AsyncStorage:", e);
+    }
+  }
+  
   const res = await fetch(`${API_BASE_URL}${path}`, {
+    ...rest,
     headers: {
       "Content-Type": "application/json",
-      ...(options.headers || {}),
+      ...(headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    ...options,
   });
 
   let data: any = null;

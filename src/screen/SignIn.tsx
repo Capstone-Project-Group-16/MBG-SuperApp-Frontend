@@ -10,6 +10,7 @@ import { colors } from "../theme/Color"
 import Logo from "../components/Logo"
 import { FormField } from "../components/FormField"
 import Button from "../components/Button"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { apiFetch } from "../lib/api";
 
 
@@ -19,6 +20,7 @@ export default function SignInScreen({ navigation }: Props) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+
 
 const onSignIn = async () => {
   if (!email || !password) {
@@ -33,6 +35,7 @@ const onSignIn = async () => {
         userEmail: email,
         userPassword: password,
       }),
+      skipAuth: true,
     });
 
     console.log("LOGIN RESPONSE:", data);
@@ -49,7 +52,15 @@ const onSignIn = async () => {
       return;
     }
     
+    const accessToken = data?.access_token;
     const studentProfileId = data.studentProfileId;
+
+    if (!accessToken) {
+      Alert.alert("Error", "Token tidak ditemukan di response login.");
+      return;
+    }
+
+    await AsyncStorage.setItem("accessToken", accessToken);
 
     if (!studentProfileId) {
       Alert.alert("Error", "Tidak bisa menemukan profil siswa dari response login.");

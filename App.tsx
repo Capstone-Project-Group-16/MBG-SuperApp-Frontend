@@ -22,10 +22,17 @@ export type RootStackParamList = {
   SignIn: undefined
   Home: { studentProfileId: number }
   FoodCustomizer: { studentProfileId: number }
-  FoodOrder: { studentProfileId: number, menuId: string, menuTitle: string, price: string, tray: any }
-  FoodScanner: { studentProfileId: number, scanMode?: "distribution" | "waste" }
+  FoodOrder: {
+    studentProfileId: number
+    foodId: number          
+    foodName: string        
+    foodPrice: number       
+    tray: any              
+    foodImageLink?: string | null  
+  }
+  FoodScanner: { scanMode?: "distribution" | "waste" }
   NutritionFacts: undefined
-  FoodWaste: { studentProfileId: number }
+  FoodWaste: undefined
   MBGQuiz: undefined
   QuizResult: { score: number; correct: number; incorrect: number; xp: number; gems: number }
   DistributionTracker: { studentProfileId: number }

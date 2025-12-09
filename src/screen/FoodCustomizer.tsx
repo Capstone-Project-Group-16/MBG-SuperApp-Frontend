@@ -1,92 +1,96 @@
 "use client"
 
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native"
+import React, { useEffect, useState } from "react"
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
-import { useEffect, useState } from "react"
-import { apiFetch } from "../lib/api";
 import StatusBar from "../components/StatusBar"
 import MenuItemCard from "../components/MenuItemCard"
+import { apiFetch } from "../lib/api"
 
 type Props = NativeStackScreenProps<RootStackParamList, "FoodCustomizer">
 
-const MENU_ITEMS = [
-  {
-    id: "1",
-    title: "Ultimate Hero Feast",
-    description: "Santapan para pahlawan utama yang meningkatkan daya tahan tubuh",
-    price: "Rp15.000",
-    trayImage: require("../../assets/icon/ultimate-hero-feast.png"),
-  },
-  {
-    id: "2",
-    title: "Speed Runner Combo",
-    description: "Kombinasi makanan yang membuatmu bergerak cepat seperti kilat",
-    price: "Rp15.000",
-    trayImage: require("../../assets/icon/speed-runner-combo.png"),
-  },
-  {
-    id: "3",
-    title: "Nature Guardian Set",
-    description: "Bekal dari hutan pelindung yang meningkatkan kekuatan alami tubuh",
-    price: "Rp15.000",
-    trayImage: require("../../assets/icon/nature-guardian-set.png"),
-  },
-  {
-    id: "4",
-    title: "Warrior Meal Boost",
-    description: "Makanan favorit para pejung agar dapat memulihkan tenaga",
-    price: "Rp15.000",
-    trayImage: require("../../assets/icon/warrior-meal-boost.png"),
-  },
-  {
-    id: "5",
-    title: "Power Up Starter",
-    description: "Paket pemula yang membangkitkan energi dasar tubuh",
-    price: "Rp15.000",
-    trayImage: require("../../assets/icon/power-up-starter.png"),
-  },
-]
+type FoodMenuItem = {
+  foodId: number
+  foodName: string
+  foodPrice: number
+  foodImageLink: string | null
+}
 
-export default function FoodCustomizer({ route, navigation }: Props) {
-  const studentProfileId = route?.params?.studentProfileId
+export default function FoodCustomizer({ navigation, route }: Props) {
+  const studentProfileId = route.params?.studentProfileId
+
+  const [budget, setBudget] = useState<string>("0")
   const [exp, setExp] = useState<string>("0")
   const [gems, setGems] = useState<string>("0")
-  const [budget, setBudget] = useState<string>("0")
+  const [menuItems, setMenuItems] = useState<FoodMenuItem[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    const loadProfile = async () => {
+    const loadData = async () => {
       if (!studentProfileId) {
         console.warn("studentProfileId tidak ada di route params")
+        setLoading(false)
         return
       }
 
       try {
-        const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
-          method: "GET",
-        })
+        // 1) Ambil student profile -> budget, exp, gems
+        const { res: profRes, data: profData } = await apiFetch(
+          `/api/account/student-profile/get/${studentProfileId}`,
+          { method: "GET" }
+        )
 
-        if (!res.ok) {
-          console.log("Gagal fetch student profile:", data)
-          return
+        if (profRes.ok && profData) {
+          setBudget(String(profData.budget ?? "0"))
+          setExp(String(profData.expPoints ?? "0"))
+          setGems(String(profData.mbgPoints ?? "0"))
+        } else {
+          console.log("Gagal fetch student profile:", profData)
         }
 
-        setExp(String(data?.expPoints ?? "0"))
-        setGems(String(data?.mbgPoints ?? "0"))
-        setBudget(String(data?.budget ?? "0"))
+        // 2) Ambil menu harian dari BE
+        const { res: menuRes, data: menuData } = await apiFetch(
+          `/api/mbg-food-customizer/food-supply/menu`,
+          {
+            method: "GET",
+          }
+        )
+
+        if (!menuRes.ok) {
+          console.log("Gagal fetch student menu:", menuData)
+        } else {
+          const items: FoodMenuItem[] =
+            menuData?.items?.map((f: any) => ({
+              foodId: f.foodId,
+              foodName: f.foodName,
+              foodPrice: f.foodPrice,
+              foodImageLink: f.foodImageLink ?? null,
+            })) ?? []
+          setMenuItems(items)
+        }
       } catch (err) {
-        console.log("Error fetch student profile:", err)
+        console.log("Error load data FoodCustomizer:", err)
+      } finally {
+        setLoading(false)
       }
     }
 
-    loadProfile()
+    loadData()
   }, [studentProfileId])
 
-  const handleOrder = (menuItem: (typeof MENU_ITEMS)[0]) => {
-    navigation.navigate("FoodOrder", { studentProfileId, menuId: menuItem.id, menuTitle: menuItem.title, price: menuItem.price, tray: menuItem.trayImage })
+  const handleOrder = (item: FoodMenuItem) => {
+    navigation.navigate("FoodOrder", {
+      studentProfileId,
+      foodId: item.foodId,
+      foodName: item.foodName,
+      foodPrice: item.foodPrice,
+      foodImageLink: item.foodImageLink,
+      tray: null, // ✅ supaya sesuai dengan RootStackParamList
+    })
   }
 
   return (
@@ -95,28 +99,57 @@ export default function FoodCustomizer({ route, navigation }: Props) {
       <View style={styles.header}>
         <StatusBar
           items={[
-            { label: "Money", icon: require("../../assets/icon/money.png"), value: budget, textColor: colors.textGreen },
+            {
+              label: "Money",
+              icon: require("../../assets/icon/money.png"),
+              value: budget,
+              textColor: colors.textGreen,
+            },
           ]}
         />
         <View style={{ flex: 1 }} />
         <StatusBar
           items={[
-            { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: exp, textColor: colors.textGold },
-            { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: gems, textColor: colors.textBlue },
+            {
+              label: "Exp",
+              icon: require("../../assets/icon/thunder.png"),
+              value: exp,
+              textColor: colors.textGold,
+            },
+            {
+              label: "Gems",
+              icon: require("../../assets/icon/diamond.png"),
+              value: gems,
+              textColor: colors.textBlue,
+            },
           ]}
         />
       </View>
 
-      {/* Title */}
       <Text style={styles.title}>MBG Menu</Text>
 
-      {/* Menu Items List */}
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {MENU_ITEMS.map((item) => (
-          <MenuItemCard key={item.id} item={item} onOrder={() => handleOrder(item)} />
-        ))}
-        <View style={{ height: hp("2%") }} />
-      </ScrollView>
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {menuItems.map((item) => (
+            <MenuItemCard
+              key={item.foodId.toString()}
+              item={{
+                id: item.foodId.toString(),
+                title: item.foodName,
+                description: "", // nanti bisa diisi dari BE kalau mau
+                price: `Rp${item.foodPrice.toLocaleString("id-ID")}`,
+                imageUrl: item.foodImageLink ?? undefined,
+              }}
+              onOrder={() => handleOrder(item)}
+            />
+          ))}
+          <View style={{ height: hp("2%") }} />
+        </ScrollView>
+      )}
     </SafeAreaView>
   )
 }
@@ -137,9 +170,7 @@ const styles = StyleSheet.create({
     fontSize: RFValue(22),
     color: colors.textBlack,
     marginBottom: hp("0.5%"),
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center"
+    textAlign: "center",
   },
   scrollContent: { paddingBottom: hp("2%") },
 })

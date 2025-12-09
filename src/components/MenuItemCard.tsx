@@ -9,7 +9,7 @@ interface MenuItem {
   title: string
   description: string
   price?: string
-  trayImage: any
+  imageUrl?: string | null
 }
 
 interface Props {
@@ -19,14 +19,50 @@ interface Props {
   showOrderButton?: boolean
 }
 
-export default function MenuItemCard({ item, onOrder, showPrice = true, showOrderButton = true }: Props) {
+export default function MenuItemCard({
+  item,
+  onOrder,
+  showPrice = true,
+  showOrderButton = true,
+}: Props) {
+  const hasImage = !!item.imageUrl
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-
-        {/* Left: Tray */}
+        {/* Left: Tray / gambar paket */}
         <View style={styles.trayWrapper}>
-          <Image source={item.trayImage} style={styles.trayImage} resizeMode="contain" />
+          {hasImage ? (
+            <Image
+              source={{ uri: item.imageUrl! }}
+              style={styles.trayImage}
+              resizeMode="contain"
+            />
+          ) : (
+            // fallback sederhana kalau BE belum kirim link
+            <View
+              style={[
+                styles.trayImage,
+                {
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#EEE",
+                  borderRadius: wp("3%"),
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  fontFamily: "Jost",
+                  fontSize: RFValue(10),
+                  color: "#777",
+                  textAlign: "center",
+                }}
+              >
+                Gambar{`\n`}belum tersedia
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Right: Title, description, price, button */}
@@ -36,8 +72,17 @@ export default function MenuItemCard({ item, onOrder, showPrice = true, showOrde
 
           {(showPrice || showOrderButton) && (
             <View style={styles.footer}>
-              {showPrice && item.price && <Text style={styles.price}>{item.price}</Text>}
-              {showOrderButton && onOrder && <Button title="ORDER" onPress={onOrder} fontSize={12} style={styles.orderButton} />}
+              {showPrice && item.price && (
+                <Text style={styles.price}>{item.price}</Text>
+              )}
+              {showOrderButton && onOrder && (
+                <Button
+                  title="ORDER"
+                  onPress={onOrder}
+                  fontSize={12}
+                  style={styles.orderButton}
+                />
+              )}
             </View>
           )}
         </View>
@@ -65,7 +110,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   trayImage: {
-    width: wp("32%"), 
+    width: wp("32%"),
     height: wp("32%"),
   },
   details: {
