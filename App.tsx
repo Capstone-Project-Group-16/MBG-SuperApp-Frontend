@@ -27,7 +27,7 @@ export type RootStackParamList = {
   FoodWaste: undefined
   MBGQuiz: undefined
   QuizResult: { score: number; correct: number; incorrect: number; xp: number; gems: number }
-  DistributionTracker: undefined
+  DistributionTracker: { studentProfileId: number }
   Leaderboard: undefined
 }
 

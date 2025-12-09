@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 const DEFAULT_LOCAL_BASE_URL =
   Platform.OS === "web"
     ? "http://localhost:8000"      
-    : "http://192.168.1.178:8000";   
+    : "http://192.168.1.2:8000";   
 
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_LOCAL_BASE_URL;
