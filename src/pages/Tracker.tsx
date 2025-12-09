@@ -160,6 +160,19 @@ const ListSubtitle = styled.div`
   color: black;
 `;
 
+const BackButton = styled.button`
+  background: none;
+  border: none;
+  color: #2b7cff;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 8px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 // const TableWrapper = styled.div`
 //   width: 100%;
 //   border-radius: 12px;
@@ -324,8 +337,25 @@ export default function Tracker() {
     setSelectedItem(null);
   };
 
-  
+  const handleBack = () => {
+    if (role === "student") {
+      if (level === 2) {
+        setSelectedItem(null);
+        setLevel(1);
+      }
+    }
 
+    if (role === "catering") {
+      if (level === 3) {
+        setSelectedItem(null);
+        setLevel(2);
+      } else if (level === 2) {
+        setSelectedItem(null);
+        setLevel(1);
+      }
+    }
+  };
+  
   // header (title + subtitle + dropdown) — akan selalu dirender di atas
   const renderHeader = () => (
     <>
@@ -404,6 +434,7 @@ export default function Tracker() {
 
         return (
           <>
+          <BackButton onClick={handleBack}>← Kembali</BackButton>
             <Title>
               MBG Detail — {selectedItem ? (selectedItem as SchoolItem).name : ""}
             </Title>
@@ -489,6 +520,7 @@ export default function Tracker() {
       if (level === 2) {
         return (
           <>
+          <BackButton onClick={handleBack}>← Kembali</BackButton>
             <Title>Sekolah yang ditangani — {selectedItem ? (selectedItem as CateringItem).name : ""}</Title>
 
             <TableCardWrapper>
@@ -529,6 +561,7 @@ export default function Tracker() {
 
         return (
           <>
+          <BackButton onClick={handleBack}>← Kembali</BackButton>
             <Title>
               MBG Detail — {selectedItem ? (selectedItem as SchoolItem).name : ""}
             </Title>

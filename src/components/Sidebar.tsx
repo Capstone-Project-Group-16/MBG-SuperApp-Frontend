@@ -58,6 +58,15 @@ interface SidebarProps {
 export default function Sidebar({ open, setOpen }: SidebarProps) {
   const navigate = useNavigate();
 
+  // integrasi bagian ini juga
+  const handleLogout = () => {
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("userData");
+
+  navigate("/login");
+};
+
+
   return (
     <>
       <BurgerButton onClick={() => setOpen(!open)}>
@@ -70,7 +79,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         <SidebarItem onClick={() => navigate("/dashboard")}>Dashboard</SidebarItem>
         <SidebarItem onClick={() => navigate("/tracker")}>Distribution Tracker</SidebarItem>
         <SidebarItem onClick={() => navigate("/statistic")}>Distribution Statistic</SidebarItem>
-        <SidebarItem onClick={() => navigate("/logout")}>Log Out</SidebarItem>
+        <SidebarItem onClick={handleLogout}>Log Out</SidebarItem>
       </SidebarWrapper>
     </>
   );
