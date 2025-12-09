@@ -75,7 +75,7 @@ export default function HomeScreen({ navigation, route }: Props) {
           title="Food Customizer"
           description="Pilih menu makan siangmu sendiri. Seru kayak main game!"
           icon={require("../../assets/icon/food-customizer.png")}
-          onPress={() => navigation.navigate("FoodCustomizer")}
+          onPress={() => navigation.navigate("FoodCustomizer", { studentProfileId })}
         />
         <View style={{ height: hp("3%") }} />
         <FeatureCard

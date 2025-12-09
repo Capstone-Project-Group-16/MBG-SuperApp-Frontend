@@ -20,8 +20,8 @@ export type RootStackParamList = {
   SplashScreen: undefined
   SignIn: undefined
   Home: { studentProfileId: number }
-  FoodCustomizer: undefined
-  FoodOrder: { selectedFoods: { id: string; label: string; icon: any }[] }
+  FoodCustomizer: { studentProfileId: number }
+  FoodOrder: { studentProfileId: number, menuId: string, menuTitle: string, price: string, tray: any }
   FoodScanner: { scanMode?: "distribution" | "waste" }
   NutritionFacts: undefined
   FoodWaste: undefined

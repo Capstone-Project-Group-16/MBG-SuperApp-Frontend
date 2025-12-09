@@ -1,8 +1,7 @@
-import { View, Text, StyleSheet } from "react-native"
+import { View, Text, StyleSheet, Image } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFValue } from "react-native-responsive-fontsize"
 import { colors } from "../theme/Color"
-import FoodTray from "./FoodTray"
 import Button from "./Button"
 
 interface MenuItem {
@@ -10,7 +9,7 @@ interface MenuItem {
   title: string
   description: string
   price?: string
-  foods: { id: string; label: string; icon?: any }[]
+  trayImage: any
 }
 
 interface Props {
@@ -27,7 +26,7 @@ export default function MenuItemCard({ item, onOrder, showPrice = true, showOrde
 
         {/* Left: Tray */}
         <View style={styles.trayWrapper}>
-          <FoodTray selectedFoods={item.foods} size={0.38} />
+          <Image source={item.trayImage} style={styles.trayImage} resizeMode="contain" />
         </View>
 
         {/* Right: Title, description, price, button */}
@@ -64,6 +63,10 @@ const styles = StyleSheet.create({
   trayWrapper: {
     alignItems: "center",
     justifyContent: "center",
+  },
+  trayImage: {
+    width: wp("32%"), 
+    height: wp("32%"),
   },
   details: {
     flex: 1,
