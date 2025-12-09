@@ -264,7 +264,7 @@ export default function Dashboard() {
 
   return (
     <PageWrapper>
-      <Navbar />
+      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <ContentWrapper>
         <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />

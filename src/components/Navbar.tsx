@@ -22,6 +22,34 @@ const NavbarContainer = styled.nav`
 const LeftSection = styled.div`
   display: flex;
   align-items: center;
+  gap: 16px;
+`;
+
+const BurgerButton = styled.button`
+  width: 40px;
+  height: 40px;
+  background: #8aa18d;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  min-width: 40px;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const BurgerBar = styled.div`
+  width: 24px;
+  height: 3px;
+  background: white;
+  border-radius: 3px;
 `;
 
 const LogoImg = styled.img`
@@ -66,10 +94,19 @@ const UsernameText = styled.span`
   color: black;
 `;
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  onToggleSidebar?: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   return (
     <NavbarContainer>
       <LeftSection>
+        <BurgerButton onClick={onToggleSidebar} aria-label="Toggle sidebar">
+          <BurgerBar />
+          <BurgerBar />
+          <BurgerBar />
+        </BurgerButton>
         <LogoImg src={Logo} alt="SuperApp Logo" />
       </LeftSection>
 

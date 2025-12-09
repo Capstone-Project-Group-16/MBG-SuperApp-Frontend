@@ -197,7 +197,7 @@ export default function Statistic() {
 
   return (
     <PageWrapper>
-      <Navbar />
+      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <ContentWrapper>
         <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
