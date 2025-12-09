@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -9,15 +10,37 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { apiLogin } from "../lib/api";
+
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+  try {
+    if (!email || !password) {
+      alert("Please enter your email and password.");
+      return;
+    }
+
+    const data = await apiLogin(email, password);
+
+    const { access_token, user } = data;
+
+    await AsyncStorage.setItem("access_token", access_token);
+    await AsyncStorage.setItem("user", JSON.stringify(user));
+
     router.replace("/home");
+
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Login failed";
+      alert(message);
+    }
   };
+
 
   return (
     <View style={styles.container}>
@@ -55,10 +78,15 @@ export default function LoginScreen() {
         <Text style={styles.forgot}>Forgot password?</Text>
       </TouchableOpacity> */}
 
-      {/* SIGN IN BUTTON */}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>SIGN IN</Text>
       </TouchableOpacity>
+
+      {error ? (
+        <Text style={{ color: "black", marginTop: 10, fontSize: 14 }}>
+          {error}
+        </Text>
+      ) : null}
 
       {/* REGISTER LINK */}
       <Text style={styles.footerText}>
