@@ -25,12 +25,14 @@ const STATUS_CONFIG: Record<string, { index: number, label: string }> = {
     "ON_DELIVERY": { index: 1, label: "Driver is on the way" },
     "ARRIVED_AT_SCHOOL": { index: 2, label: "Food arrived! Scan to Eat." },
     "FINISHED_EATING": { index: 3, label: "You finished eating. Waiting pickup." },
-    "RETURNING_TO_CATERING": { index: 4, label: "Driver picking up plates" }, // Optional steps
+    "RETURNING_TO_CATERING": { index: 4, label: "Driver picking up plates" }, 
     "RETURNED_TO_CATERING": { index: 5, label: "Plate returned. See you tomorrow!" }
 };
 
 export default function DistributionTracker({ navigation, route }: Props) {
     const studentProfileId = route?.params?.studentProfileId
+    const LAST_ORDER_KEY = `lastOrderId_${studentProfileId}`;
+
     const [exp, setExp] = useState<string>("0")
     const [gems, setGems] = useState<string>("0")
     
@@ -72,15 +74,11 @@ export default function DistributionTracker({ navigation, route }: Props) {
             
             if (res.ok && data) {
                 const status = data.status;
-                console.log("Current Status:", status);
-
                 const config = STATUS_CONFIG[status] || STATUS_CONFIG["BEING_PREPARED"];
                 
                 setCompletedIndex(config.index);
                 setCurrentStatusLabel(config.label);
 
-                // Jika status backend sudah FINISHED_EATING (3) atau lebih
-                // berarti user SUDAH menyelesaikan makan secara sistem
                 if (config.index >= 3) {
                     setHasScannedWaste(true);
                 }
@@ -95,11 +93,10 @@ export default function DistributionTracker({ navigation, route }: Props) {
         if (completedIndex < 2) {
             navigation.navigate("FoodScanner", { studentProfileId, scanMode: "distribution" });
         } 
-        // 2. Selesaikan Makan (Hanya bisa jika status ARRIVED_AT_SCHOOL / index 2)
+        // 2. Selesaikan Makan
         else if (completedIndex === 2) {
             
             if (!hasScannedWaste) {
-                // Paksa Scan Waste Dulu
                 Alert.alert(
                     "Selesaikan Makan",
                     "Foto piring kosongmu (Food Waste) dulu ya!",
@@ -107,7 +104,7 @@ export default function DistributionTracker({ navigation, route }: Props) {
                         { 
                             text: "Scan Sekarang", 
                             onPress: async () => {
-                                const lastOrderId = await AsyncStorage.getItem("lastOrderId");
+                                const lastOrderId = await AsyncStorage.getItem(LAST_ORDER_KEY);
                                 if (!lastOrderId) {
                                     Alert.alert("Error", "Silahkan order kembali.");
                                     return;
@@ -124,8 +121,6 @@ export default function DistributionTracker({ navigation, route }: Props) {
                     ]
                 );
             } else {
-                // Sudah Scan Waste -> Panggil API Finish Eating
-                // Ini akan mengubah status BE dari ARRIVED_AT_SCHOOL -> FINISHED_EATING
                 try {
                     const { res, data } = await apiFetch("/api/mbg-food-distribution-tracker/food-distributor/finish-eating", {
                         method: "POST"
@@ -133,7 +128,7 @@ export default function DistributionTracker({ navigation, route }: Props) {
 
                     if (res.ok) {
                         await AsyncStorage.removeItem("temp_has_scanned_waste");
-                        loadTrackingStatus(); // Refresh, status akan naik ke index 3
+                        loadTrackingStatus(); 
                         Alert.alert("Terima Kasih!", "Piring siap dikembalikan ke Catering.");
                     } else {
                         Alert.alert("Gagal", data?.detail || "Gagal update status.");
@@ -147,22 +142,15 @@ export default function DistributionTracker({ navigation, route }: Props) {
 
     const getButtonTitle = () => {
         if (completedIndex < 2) return "SCAN TO RECEIVE FOOD";
-        
-        // Tombol hanya aktif di index 2 (saat makan)
         if (completedIndex === 2) {
-            return hasScannedWaste ? "FINISH EATING (CLICK TO CONFIRM)" : "SCAN WASTE & FINISH";
+            // Text lebih pendek agar muat dan rapi
+            return hasScannedWaste ? "FINISH EATING" : "SCAN WASTE & FINISH";
         }
-        
-        // Index 3 (Finished Eating) & Index 5 (Returned) -> Tombol mati
-        if (completedIndex === 3) return "WAITING FOR CATERING PICKUP";
-        if (completedIndex >= 4) return "ORDER COMPLETED";
-        
+        if (completedIndex === 3) return "WAITING PICKUP";
         return "ORDER COMPLETED";
     }
 
     const isButtonDisabled = () => {
-        // Disable jika status > 2 (Finished Eating / Returned)
-        // Enable jika status < 2 (Belum terima) atau == 2 (Sedang makan)
         return completedIndex >= 3;
     }
 
@@ -215,9 +203,13 @@ export default function DistributionTracker({ navigation, route }: Props) {
                 <Button
                     title={getButtonTitle()}
                     onPress={handleMainButton}
-                    // Ubah warna jadi abu-abu jika disable
                     style={isButtonDisabled() ? { backgroundColor: colors.brandGrey } : (completedIndex === 2 && !hasScannedWaste ? { backgroundColor: colors.brandBlue } : {})}
                     disabled={isButtonDisabled()}
+                    // Fix text alignment specifically for this button
+                    textStyle={{ 
+                        textAlign: 'center',
+                        color: isButtonDisabled() ? colors.textGray : colors.white 
+                    }}
                 />
             </View>
 

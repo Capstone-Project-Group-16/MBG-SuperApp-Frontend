@@ -19,11 +19,13 @@ export default function FoodScanner({ navigation, route }: Props) {
   
   const [actualOrderId, setActualOrderId] = useState<number | null>(orderId || null)
   const [currentPhase, setCurrentPhase] = useState<"before" | "after">(phase)
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false) // State loading cek status
+
   const cameraRef = useRef<CameraView>(null)
   const [flashEnabled, setFlashEnabled] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   
-  // State untuk lock scanner QR
+  // State untuk lock scanner QR agar tidak scan berkali-kali
   const [scanned, setScanned] = useState(false)
   
   const [permission, requestPermission] = useCameraPermissions()
@@ -34,21 +36,58 @@ export default function FoodScanner({ navigation, route }: Props) {
         await requestPermission()
       }
 
+      let idToUse = actualOrderId;
+
       // Fallback: Jika orderId tidak dikirim lewat params, ambil dari Storage
-      if (!actualOrderId) {
+      if (!idToUse) {
         try {
           const stored = await AsyncStorage.getItem("lastOrderId");
           if (stored) {
-            setActualOrderId(Number(stored));
-            console.log("OrderId recovered from storage:", stored);
+            idToUse = Number(stored);
+            setActualOrderId(idToUse);
+            console.log("OrderId recovered from storage:", idToUse);
           }
         } catch (err) {
           console.warn("Failed to load orderId:", err);
         }
       }
+
+      // Jika mode Waste dan ada OrderID, cek status gambar ke Backend (untuk menentukan phase)
+      if (scanMode === "waste" && idToUse) {
+        await checkWastePhase(idToUse);
+      }
     }
     init()
   }, [])
+
+  // Fungsi Baru: Cek fase ke backend (agar bisa dijeda)
+  const checkWastePhase = async (oid: number) => {
+    setIsCheckingStatus(true);
+    try {
+        const { res, data } = await apiFetch(`/api/storage/checkWasteStatus/${oid}`, { method: "GET" });
+        
+        if (res.ok && data) {
+            console.log("Waste Status:", data);
+            
+            if (data.hasAfter) {
+                // Jika after sudah ada, berarti proses selesai -> hitung ulang/pindah
+                // Atau bisa alert "Sudah selesai"
+                await calculateWaste(oid); 
+            } else if (data.hasBefore) {
+                // Jika before ada tapi after belum -> Set phase ke AFTER
+                setCurrentPhase("after");
+                Alert.alert("Info", "Kamu sudah foto 'Before'. Silahkan foto 'After' makan.");
+            } else {
+                // Belum ada foto sama sekali -> Set phase ke BEFORE
+                setCurrentPhase("before");
+            }
+        }
+    } catch (e) {
+        console.log("Failed to check phase", e);
+    } finally {
+        setIsCheckingStatus(false);
+    }
+  }
 
   // Reset scanner lock setiap kali masuk layar
   useEffect(() => {
@@ -179,6 +218,19 @@ export default function FoodScanner({ navigation, route }: Props) {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
+        // Handle spesifik jika error "Image already exists" (meskipun sudah dicek di awal, untuk jaga-jaga race condition)
+        if (res.status === 400 && data?.detail?.includes("already exists")) {
+            if (currentPhase === "before") {
+                Alert.alert("Info", "Foto Before sudah ada. Lanjut ke foto After.");
+                setCurrentPhase("after");
+            } else {
+                Alert.alert("Info", "Foto After sudah ada. Menghitung hasil...");
+                await calculateWaste(actualOrderId);
+            }
+            setIsLoading(false);
+            return;
+        }
+
         Alert.alert("Upload Failed", data?.detail || `Server error (${res.status})`)
         setIsLoading(false)
         return
@@ -187,7 +239,7 @@ export default function FoodScanner({ navigation, route }: Props) {
       // Logic Transisi Phase
       if (currentPhase === "after") {
         // Jika phase 'after' selesai, hitung waste
-        await calculateWaste()
+        await calculateWaste(actualOrderId)
       } else {
         // Jika phase 'before' selesai, ganti ke 'after'
         setCurrentPhase("after")
@@ -200,10 +252,10 @@ export default function FoodScanner({ navigation, route }: Props) {
     }
   }
 
-  const calculateWaste = async () => {
+  const calculateWaste = async (oid: number) => {
     try {
       const { res, data } = await apiFetch(
-        `/api/mbg-food-waste-tracker/food-calculation/waste-percentage/${actualOrderId}`,
+        `/api/mbg-food-waste-tracker/food-calculation/waste-percentage/${oid}`,
         { method: "GET" }
       )
       
@@ -214,7 +266,7 @@ export default function FoodScanner({ navigation, route }: Props) {
 
           navigation.replace("FoodWaste", {
             studentProfileId,
-            orderId: actualOrderId!, // Kirim orderId yang valid
+            orderId: oid, // Kirim orderId yang valid
             wastePercentage: data?.wastePercentage,
             beforeArea: data?.beforeArea,
             afterArea: data?.afterArea,
@@ -223,7 +275,6 @@ export default function FoodScanner({ navigation, route }: Props) {
           Alert.alert("Gagal", data?.detail || "Gagal menghitung waste.")
       }
     } catch (error: any) {
-      setIsLoading(false)
       Alert.alert("Error", error.message)
     } finally {
         setIsLoading(false);
@@ -279,11 +330,13 @@ export default function FoodScanner({ navigation, route }: Props) {
             <View style={[styles.corner, styles.bottomRight]} />
             
             {/* Loading Overlay */}
-            {isLoading && (
+            {(isLoading || isCheckingStatus) && (
                 <View style={StyleSheet.absoluteFillObject}>
                     <View style={{flex:1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent:'center', alignItems:'center', borderRadius: 20}}>
                         <ActivityIndicator size="large" color={colors.brandGreen} />
-                        <Text style={{color:'white', marginTop: 10, fontWeight:'bold'}}>Processing...</Text>
+                        <Text style={{color:'white', marginTop: 10, fontWeight:'bold'}}>
+                            {isCheckingStatus ? "Checking status..." : "Processing..."}
+                        </Text>
                     </View>
                 </View>
             )}
@@ -293,7 +346,7 @@ export default function FoodScanner({ navigation, route }: Props) {
 
           {/* Tombol Foto HANYA MUNCUL DI MODE WASTE */}
           {scanMode === "waste" && (
-            <Pressable style={styles.captureButton} onPress={handleCapture} disabled={isLoading}>
+            <Pressable style={styles.captureButton} onPress={handleCapture} disabled={isLoading || isCheckingStatus}>
               <View style={styles.captureButtonInner} />
             </Pressable>
           )}
