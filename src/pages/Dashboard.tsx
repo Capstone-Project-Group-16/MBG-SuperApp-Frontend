@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import DistributionImg from "../fe-assets/distribution.png";
 import { apiRequest, API_ENDPOINTS, getStoredToken } from "../services/api";
 
 interface MostOrderedFood {
@@ -72,6 +71,13 @@ interface WasteStatsResponse {
     orderId: number;
     wastePercentage: number;
   }>;
+}
+
+interface Plate {
+  plateId: number;
+  orderId: number | null;
+  plateCode: string;
+  plateStatus: string;
 }
 
 const PageWrapper = styled.div`
@@ -151,14 +157,6 @@ const ArrowButton = styled(Link)`
   &:hover {
     opacity: 0.8;
   }
-`;
-
-const DistributionImage = styled.img`
-  width: 55%;
-  max-width: 150px;
-  margin: 0 auto;
-  display: block;
-  margin-bottom: 18px;
 `;
 
 const DistributionItem = styled.div`
@@ -517,6 +515,7 @@ export default function Dashboard() {
   const [nutrition, setNutrition] = useState<Nutrition | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [wasteAverage, setWasteAverage] = useState(0);
+  const [plates, setPlates] = useState<Plate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -530,8 +529,9 @@ export default function Dashboard() {
         const nutritionEndpoint = `${API_ENDPOINTS.FOOD_DEMAND.AVERAGE_NUTRITION}?order_date=${orderDate}&filter_type=all`;
         const leaderboardEndpoint = `${API_ENDPOINTS.LEADERBOARD.GET}?filter_type=all`;
         const wasteEndpoint = `${API_ENDPOINTS.WASTE_STATS.ALL}?limit=1000`;
+        const platesEndpoint = `${API_ENDPOINTS.PLATE.LIST}?skip=0&limit=1000`;
         
-        const [foodData, nutritionData, leaderboardData, wasteData] = await Promise.all([
+        const [foodData, nutritionData, leaderboardData, wasteData, platesData] = await Promise.all([
           apiRequest<MostOrderedFoodResponse>(foodEndpoint, {
             method: "GET",
             token: token || undefined,
@@ -548,6 +548,10 @@ export default function Dashboard() {
             method: "GET",
             token: token || undefined,
           }),
+          apiRequest<Plate[]>(platesEndpoint, {
+            method: "GET",
+            token: token || undefined,
+          }),
         ]);
         
         // Limit to 10 items
@@ -555,12 +559,14 @@ export default function Dashboard() {
         setNutrition(nutritionData.data);
         setLeaderboard(leaderboardData.leaderboard.slice(0, 10));
         setWasteAverage(wasteData.averageWastePercentage);
+        setPlates(platesData.slice(0, 5));
       } catch (error) {
         console.error("Failed to fetch data:", error);
         setMostOrderedFood([]);
         setNutrition(null);
         setLeaderboard([]);
         setWasteAverage(0);
+        setPlates([]);
       } finally {
         setIsLoading(false);
       }
@@ -584,17 +590,31 @@ export default function Dashboard() {
           <TopRow>
             <DistributionCard>
               <DistributionHeader>
-                Check Distribution
+                Plates Status
                 <ArrowButton to="/tracker">→</ArrowButton>
               </DistributionHeader>
 
-              <DistributionImage src={DistributionImg} alt="Distribution" />
-
-              {/* recent activity masih hardcode, integrasi be-fe disini */}
-              <DistributionItem>
-                <span>10 school orders in Depok are currently on delivery</span>
-                <span style={{ opacity: 0.7, fontSize: "12px" }}>09:00 AM</span>
-              </DistributionItem>
+              {isLoading ? (
+                <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                  Loading...
+                </div>
+              ) : plates.length > 0 ? (
+                <div style={{ padding: "15px" }}>
+                  {plates.map((plate) => (
+                    <DistributionItem key={plate.plateId}>
+                      <span style={{ fontWeight: 600 }}>{plate.plateCode}</span>
+                      <span style={{ opacity: 0.7, fontSize: "12px", display: "block", marginTop: "4px" }}>
+                        Status: {plate.plateStatus.replace(/_/g, " ")}
+                        {plate.orderId && ` • Order #${plate.orderId}`}
+                      </span>
+                    </DistributionItem>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                  No plates available
+                </div>
+              )}
             </DistributionCard>
 
             {/* FAVORITE MENU PER WEEK */}

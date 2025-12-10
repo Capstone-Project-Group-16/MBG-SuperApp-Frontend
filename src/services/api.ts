@@ -17,6 +17,11 @@ export const API_ENDPOINTS = {
   WASTE_STATS: {
     ALL: "/mbg-food-waste-tracker/food-analyzer/waste-stats/all",
   },
+  PLATE: {
+    LIST: "/plate/list",
+    GET_STATUS: "/mbg-food-distribution-tracker/food-distributor/get-plate-distribution-status",
+    GET_HISTORY: "/mbg-food-distribution-tracker/food-distributor/get-plate-distribution-history",
+  },
 };
 
 // Helper function to make API requests

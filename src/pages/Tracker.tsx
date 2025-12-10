@@ -1,11 +1,11 @@
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import React, { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { API_ENDPOINTS, apiRequest, getStoredToken } from "../services/api";
 
 // layout utama
 const PageWrapper = styled.div`
@@ -30,12 +30,6 @@ const MainContent = styled.div`
   padding: 40px;
   margin-left: 20px;
 `;
-
-// const Container = styled.div`
-//   padding: 24px;
-//   width: 100%;
-//   box-sizing: border-box;
-// `;
 
 const Title = styled.h2`
   font-size: 25px;
@@ -94,7 +88,6 @@ const Select = styled.select`
   }
 `;
 
-// tabel tingkatan 1 student dan 1,2 catering
 const TableCardWrapper = styled.div`
   flex: 1;
   height: auto;
@@ -128,494 +121,134 @@ const CardHeader = styled.div`
   color: black;
 `;
 
-const ListItem = styled.div`
-  height: 60px;
-  background: #e5ffe6;
+const PlateItem = styled.div<{ status: string }>`
+  height: 80px;
+  background: ${(props) => {
+    switch (props.status) {
+      case "READY_TO_USE":
+        return "#e5ffe6";
+      case "BEING_USED":
+        return "#fff3e0";
+      case "MISSING":
+        return "#ffebee";
+      case "DECOMMISSIONED":
+        return "#f5f5f5";
+      default:
+        return "#e5ffe6";
+    }
+  }};
   border-radius: 10px;
   border: 1px #8aa18d solid;
 
   margin: 12px 0;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   padding-left: 20px;
 
-  font-size: 23px;
-  font-weight: 700;
-  color: black;
-
   cursor: pointer;
-
   transition: 0.2s;
 
   &:hover {
-    background: #d7ffd7;
+    box-shadow: 0 4px 12px rgba(69, 162, 70, 0.2);
+    transform: translateY(-2px);
   }
 `;
 
-const ListSubtitle = styled.div`
-  margin-top: 6px;
-  margin-left: 4px;
-  font-size: 15px;
-  font-weight: 400;
+const PlateTitle = styled.div`
+  font-size: 18px;
+  font-weight: 700;
   color: black;
 `;
 
-const BackButton = styled.button`
-  background: none;
-  border: none;
-  color: #2b7cff;
-  font-size: 16px;
-  cursor: pointer;
-  margin-bottom: 8px;
-
-  &:hover {
-    text-decoration: underline;
-  }
+const PlateSubtitle = styled.div`
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #666;
 `;
 
-// const TableWrapper = styled.div`
-//   width: 100%;
-//   border-radius: 12px;
-//   overflow: hidden;
-//   border: 1px solid #ddd;
-
-//   .ag-theme-alpine {
-//     --ag-foreground-color: black !important;
-//     --ag-data-color: black !important;
-//     --ag-header-foreground-color: black !important;
-//   }
-
-//   .ag-cell,
-//   .ag-cell-value,
-//   .ag-header-cell-text {
-//     color: black !important;
-//   }
-// `;
-
-// detail tabel
-const DetailTableCard = styled.div`
-  width: 100%;
-  background: white;
-  border-radius: 12px;
-  border: 2px solid #8ec58f;
-  overflow: hidden;
-  margin-top: 10px;
-`;
-
-const DetailHeaderBar = styled.div`
-  background: #e9f6ea;
-  padding: 10px;
+const LoadingMessage = styled.div`
   text-align: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: #2d4d30;
+  padding: 30px;
+  color: #999;
 `;
 
-// tabel tingkat akhir tiap role (final mbg data)
-
-// const DetailTableWrapperScrollable = styled.div`
-//   max-height: 350px;
-//   overflow-y: auto;
-// `;
-
-const DetailTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  background: #f7fcf7;
-
-  th {
-    position: sticky;
-    top: 0;
-    background: #e9f6ea;
-    z-index: 2;
-
-    font-size: 14px;
-    padding: 12px;
-    border-bottom: 2px solid #c2dfc2;
-    color: #2b4b2e;
-  }
-
-  td {
-    padding: 10px;
-    text-align: center;
-    border-bottom: 1px solid #d8ead8;
-    font-size: 14px;
-    background: white;
-  }
+const ErrorMessage = styled.div`
+  background: #ffebee;
+  border: 1px solid #ff6b6b;
+  border-radius: 10px;
+  padding: 15px;
+  color: #ff6b6b;
+  margin-bottom: 20px;
 `;
 
-const DateFilterRow = styled.div`
-  display: flex;
-  margin-bottom: 12px;
-`;
-
-const DateFilterButton = styled.button`
-  background: #e6ffe7;
-  border: 2px solid #57a65a;
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-
-  &:hover {
-    background: #d3ffd4;
-  }
-`;
-
-// data types
-type Province = string;
-
-type SchoolItem = { id: number; name: string };
-type CateringItem = { id: number; name: string };
-
-type StudentMBGRow = {
-  date: string;
-  plate: string;
-  menu: string;
-  received: string;
-  time: string;
-  returned: string;
-}; // placeholder !!!
-
-type CateringMBGRow = {
-  date: string;
-  time: string;
-  plate: string;
-  menu: string;
-  sent: string;
-  received: string;
-}; // placeholder !!!
-
-// to-do => replace dengan backend
-const provinces: Province[] = [
-  "DKI Jakarta",
-  "Jawa Barat",
-  "Jawa Tengah",
-  "DI Yogyakarta",
-  "Jawa Timur",
-  "Bali",
-  "Sumatera Utara",
-  "Sulawesi Selatan",
-  "Papua",
-];
-
-const dummySchools = [
-  { id: 1, name: "SMAN 1 DEPOK" },
-  { id: 2, name: "SMAN 2 DEPOK" },
-]; // Level 1 Student
-
-const dummyCaterings = [
-  { id: 1, name: "Catering A" },
-  { id: 2, name: "Catering B" },
-]; // Level 1 Catering
-
-const dummyCateringSchools = [
-  { id: 10, name: "SMAN 1 DEPOK" },
-  { id: 11, name: "SMAN 2 DEPOK" },
-]; // Level 2 Catering
+interface Plate {
+  plateId: number;
+  orderId: number | null;
+  plateCode: string;
+  plateStatus: string;
+}
 
 export default function Tracker() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const [plates, setPlates] = useState<Plate[]>([]);
+  const [filteredPlates, setFilteredPlates] = useState<Plate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const [role, setRole] = useState<"" | "student" | "catering">("");
-  const [province, setProvince] = useState<Province | "">("");
-  const [level, setLevel] = useState<number>(0);
-  const [selectedItem, setSelectedItem] = useState<SchoolItem | CateringItem | null>(null);
-
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  const handleSelectRole = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRole(e.target.value as "student" | "catering" | "");
-    setLevel(0);
-    setSelectedItem(null);
-  };
-
-  const handleSelectProvince = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setProvince(e.target.value);
-    setLevel(1); // daerah (provinsi) dipilih => masuk tampilan tingkatan 1
-    setSelectedItem(null);
-  };
-
-  const handleBack = () => {
-    if (role === "student") {
-      if (level === 2) {
-        setSelectedItem(null);
-        setLevel(1);
+  useEffect(() => {
+    const fetchPlates = async () => {
+      try {
+        const token = getStoredToken();
+        const data = await apiRequest<Plate[]>(
+          `${API_ENDPOINTS.PLATE.LIST}?skip=0&limit=1000`,
+          { method: "GET", token: token || undefined }
+        );
+        setPlates(data);
+        setFilteredPlates(data);
+      } catch (err) {
+        console.error("Failed to fetch plates:", err);
+        setError("Failed to load plates. Please try again.");
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
-    if (role === "catering") {
-      if (level === 3) {
-        setSelectedItem(null);
-        setLevel(2);
-      } else if (level === 2) {
-        setSelectedItem(null);
-        setLevel(1);
-      }
+    fetchPlates();
+  }, []);
+
+  const handleStatusFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const status = e.target.value;
+    setStatusFilter(status);
+    setCurrentPage(1);
+
+    if (status === "") {
+      setFilteredPlates(plates);
+    } else {
+      setFilteredPlates(plates.filter((p) => p.plateStatus === status));
     }
   };
-  
-  // header (title + subtitle + dropdown) — akan selalu dirender di atas
-  const renderHeader = () => (
-    <>
-      <Title>Distribution Tracker</Title>
-      <SubtitleBox>
-        Update mengenai persebaran MBG ke berbagai sekolah melalui data pada tabel
-        katering dan sekolah. Lakukan filtering pada tombol di bawah sebagai berikut.
-      </SubtitleBox>
 
-      <DropdownRow>
-        <Select aria-label="Pilih Role" value={role} onChange={handleSelectRole}>
-          <option value="">Pilih Role</option>
-          <option value="student">Student</option>
-          <option value="catering">Catering</option>
-        </Select>
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      READY_TO_USE: "#45a246",
+      BEING_USED: "#FFC447",
+      MISSING: "#ff6b6b",
+      DECOMMISSIONED: "#999",
+    };
+    return colors[status] || "#999";
+  };
 
-        <Select aria-label="Pilih Provinsi" value={province} onChange={handleSelectProvince}>
-          <option value="">Pilih Provinsi</option>
-          {provinces.map((p) => (
-            <option key={p} value={p}>
-              {p}
-            </option>
-          ))}
-        </Select>
-      </DropdownRow>
-    </>
+  const paginatedPlates = filteredPlates.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
-
-  // bagian content (hasil filtering)
-  const renderContent = () => {
-    if (!role || !province) {
-      return null;
-    }
-
-    if (role === "student") {
-      if (level === 1) {
-        return (
-          <>
-            <Title>Daftar Sekolah — {province}</Title>
-
-            <TableCardWrapper>
-              <CardOuter>
-                <CardHeader>List sekolah per daerah</CardHeader>
-
-                <ListSubtitle>Total sekolah: {dummySchools.length}</ListSubtitle>
-
-                {dummySchools.map((s) => (
-                  <ListItem
-                    key={s.id}
-                    onClick={() => {
-                      setSelectedItem(s);
-                      setLevel(2);
-                    }}
-                  >
-                    {s.name}
-                  </ListItem>
-                ))}
-              </CardOuter>
-            </TableCardWrapper>
-          </>
-        );
-      }
-
-      if (level === 2) {
-
-        const rowData: StudentMBGRow[] = [
-          {
-            date: "2025-12-01",
-            plate: "P-001",
-            menu: "Ultimate Hero Feast",
-            received: "Received",
-            time: "09:10",
-            returned: "No",
-          },
-        ];
-
-        return (
-          <>
-          <BackButton onClick={handleBack}>← Kembali</BackButton>
-            <Title>
-              MBG Detail — {selectedItem ? (selectedItem as SchoolItem).name : ""}
-            </Title>
-
-            <DateFilterRow>
-              <DateFilterButton>
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  dateFormat="dd/MM/yyyy"
-                  popperPlacement="bottom-start"
-                  placeholderText="Pilih tanggal"
-                />
-              </DateFilterButton>
-            </DateFilterRow>
-
-            <DetailTableCard>
-              <DetailHeaderBar>
-                {selectedItem ? (selectedItem as SchoolItem).name : ""}
-              </DetailHeaderBar>
-
-                <DetailTable>
-                  <thead>
-                    <tr>
-                      <th>Tanggal Pemesanan</th>
-                      <th>Kode Piring</th>
-                      <th>Menu</th>
-                      <th>Status Penerimaan</th>
-                      <th>Waktu Sampai</th>
-                      <th>Status Pengembalian</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {rowData.map((row, idx) => (
-                      <tr key={idx}>
-                        <td>{row.date}</td>
-                        <td>{row.plate}</td>
-                        <td>{row.menu}</td>
-                        <td>{row.received}</td>
-                        <td>{row.time}</td>
-                        <td>{row.returned}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </DetailTable>
-            </DetailTableCard>
-          </>
-        );
-      }
-    }
-
-    if (role === "catering") {
-      if (level === 1) {
-        return (
-          <>
-            <Title>Daftar Catering — {province}</Title>
-
-            <TableCardWrapper>
-              <CardOuter>
-                <CardHeader>List catering per daerah</CardHeader>
-
-                <ListSubtitle>Total catering: {dummyCaterings.length}</ListSubtitle>
-
-                {dummyCaterings.map((c) => (
-                  <ListItem
-                    key={c.id}
-                    onClick={() => {
-                      setSelectedItem(c);
-                      setLevel(2);
-                    }}
-                  >
-                    {c.name}
-                  </ListItem>
-                ))}
-              </CardOuter>
-            </TableCardWrapper>
-
-          </>
-        );
-      }
-
-      if (level === 2) {
-        return (
-          <>
-          <BackButton onClick={handleBack}>← Kembali</BackButton>
-            <Title>Sekolah yang ditangani — {selectedItem ? (selectedItem as CateringItem).name : ""}</Title>
-
-            <TableCardWrapper>
-              <CardOuter>
-                <CardHeader>List sekolah per daerah</CardHeader>
-
-                <ListSubtitle>Total sekolah: {dummyCateringSchools.length}</ListSubtitle>
-
-                {dummyCateringSchools.map((s) => (
-                  <ListItem
-                    key={s.id}
-                    onClick={() => {
-                      setSelectedItem(s);
-                      setLevel(3);
-                    }}
-                  >
-                    {s.name}
-                  </ListItem>
-                ))}
-              </CardOuter>
-            </TableCardWrapper>
-          </>
-        );
-      }
-
-      if (level === 3) {
-
-        const rowData: CateringMBGRow[] = [
-          {
-            date: "2025-12-01",
-            time: "08:45",
-            plate: "P-001",
-            menu: "Ultimate Hero Feast",
-            sent: "Sent",
-            received: "No",
-          },
-        ];
-
-        return (
-          <>
-          <BackButton onClick={handleBack}>← Kembali</BackButton>
-            <Title>
-              MBG Detail — {selectedItem ? (selectedItem as SchoolItem).name : ""}
-            </Title>
-
-            <DateFilterRow>
-              <DateFilterButton>
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  dateFormat="dd/MM/yyyy"
-                  popperPlacement="bottom-start"
-                  placeholderText="Pilih tanggal"
-                />
-              </DateFilterButton>
-            </DateFilterRow>
-
-            <DetailTableCard>
-              <DetailHeaderBar>
-                {selectedItem ? (selectedItem as SchoolItem).name : ""}
-              </DetailHeaderBar>
-
-                <DetailTable>
-                  <thead>
-                    <tr>
-                      <th>Tanggal Pengiriman</th>
-                      <th>Waktu Pengiriman</th>
-                      <th>Kode Piring</th>
-                      <th>Menu</th>
-                      <th>Status Pengiriman</th>
-                      <th>Status Penerimaan</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {rowData.map((row, idx) => (
-                      <tr key={idx}>
-                        <td>{row.date}</td>
-                        <td>{row.time}</td>
-                        <td>{row.plate}</td>
-                        <td>{row.menu}</td>
-                        <td>{row.sent}</td>
-                        <td>{row.received}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </DetailTable>
-            </DetailTableCard>
-          </>
-        );
-      }
-
-    return null;
-  };
-}
+  const totalPages = Math.ceil(filteredPlates.length / itemsPerPage);
 
   return (
     <PageWrapper>
@@ -625,8 +258,91 @@ export default function Tracker() {
         <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
         <MainContent>
-          {renderHeader()}
-          {renderContent()}
+          <Title>Distribution Tracker</Title>
+          <SubtitleBox>
+            Click on any plate to view its distribution status and complete history.
+            Filter plates by their current status using the dropdown below.
+          </SubtitleBox>
+
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+
+          <DropdownRow>
+            <Select value={statusFilter} onChange={handleStatusFilter}>
+              <option value="">All Statuses</option>
+              <option value="READY_TO_USE">Ready to Use</option>
+              <option value="BEING_USED">Being Used</option>
+              <option value="MISSING">Missing</option>
+              <option value="DECOMMISSIONED">Decommissioned</option>
+            </Select>
+          </DropdownRow>
+
+          {loading ? (
+            <LoadingMessage>Loading plates...</LoadingMessage>
+          ) : filteredPlates.length === 0 ? (
+            <LoadingMessage>No plates found</LoadingMessage>
+          ) : (
+            <>
+              <TableCardWrapper>
+                <CardOuter>
+                  <CardHeader>All Plates ({filteredPlates.length})</CardHeader>
+
+                  {paginatedPlates.map((plate) => (
+                    <PlateItem
+                      key={plate.plateId}
+                      status={plate.plateStatus}
+                      onClick={() => navigate(`/distribution-detail/${plate.plateId}`)}
+                    >
+                      <PlateTitle>{plate.plateCode}</PlateTitle>
+                      <PlateSubtitle>
+                        Status: <span style={{ color: getStatusColor(plate.plateStatus), fontWeight: 600 }}>
+                          {plate.plateStatus.replace(/_/g, " ")}
+                        </span>
+                        {plate.orderId && ` • Order #${plate.orderId}`}
+                      </PlateSubtitle>
+                    </PlateItem>
+                  ))}
+
+                  {totalPages > 1 && (
+                    <div style={{ marginTop: "20px", textAlign: "center" }}>
+                      <button
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1}
+                        style={{
+                          margin: "0 5px",
+                          padding: "6px 12px",
+                          background: currentPage === 1 ? "#ddd" : "#45a246",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "5px",
+                          cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        Previous
+                      </button>
+                      <span style={{ margin: "0 10px" }}>
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        disabled={currentPage === totalPages}
+                        style={{
+                          margin: "0 5px",
+                          padding: "6px 12px",
+                          background: currentPage === totalPages ? "#ddd" : "#45a246",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "5px",
+                          cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </CardOuter>
+              </TableCardWrapper>
+            </>
+          )}
         </MainContent>
       </ContentWrapper>
     </PageWrapper>
