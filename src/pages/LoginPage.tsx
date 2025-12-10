@@ -59,6 +59,7 @@ const Input = styled.input`
   background: #ecf0f3;
   font-size: 16px;
   color: black;
+  box-sizing: border-box;
   ::placeholder {
     color: #555;
     opacity: 1;
