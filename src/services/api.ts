@@ -7,6 +7,9 @@ export const API_ENDPOINTS = {
     ME: "/account/auth/me",
     REFRESH: "/account/auth/refresh",
   },
+  FOOD_DEMAND: {
+    MOST_ORDERED: "/mbg-food-customizer/food-demand/most-ordered",
+  },
 };
 
 // Helper function to make API requests

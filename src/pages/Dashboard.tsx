@@ -1,9 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import DistributionImg from "../fe-assets/distribution.png";
+import { apiRequest, API_ENDPOINTS, getStoredToken } from "../services/api";
+
+interface MostOrderedFood {
+  rank: number;
+  foodId: number;
+  foodName: string;
+  foodImageLink: string;
+  foodPrice: number;
+  cateringId: number;
+  totalOrders: number;
+}
+
+interface MostOrderedFoodResponse {
+  mostOrderedFood: MostOrderedFood[];
+  total: number;
+  orderDate: string;
+  filterType: string;
+}
 
 const PageWrapper = styled.div`
   width: 100vw;
@@ -180,19 +198,45 @@ const FavoriteMenuLarge = styled.div`
   padding: 20px 25px;
   color: black;
   height: fit-content;
+  max-height: 600px;
+  overflow-y: auto;
+`;
+
+const FavMenuContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
 
 const FavMenuCard = styled.div`
   background: white;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid #45a246;
-  padding: 16px 20px;
-  margin-bottom: 12px;
+  padding: 10px 14px;
+  margin-bottom: 0;
   color: black;
+  min-height: 50px;
 
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
+  justify-content: center;
+
+  &:hover {
+    background-color: #f9fff9;
+  }
+`;
+
+const FavMenuTitle = styled.div`
+  font-weight: 600;
+  font-size: 15px;
+  color: #214626;
+`;
+
+const FavMenuCount = styled.div`
+  opacity: 0.7;
+  font-size: 13px;
+  color: #555;
 `;
 // ---
 
@@ -261,6 +305,37 @@ const SmallStatCard = styled.div`
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mostOrderedFood, setMostOrderedFood] = useState<MostOrderedFood[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMostOrderedFood = async () => {
+      try {
+        const token = getStoredToken();
+        const today = new Date();
+        const orderDate = `${String(today.getDate()).padStart(2, "0")}:${String(today.getMonth() + 1).padStart(2, "0")}:${today.getFullYear()}`;
+        
+        const endpoint = `${API_ENDPOINTS.FOOD_DEMAND.MOST_ORDERED}?order_date=${orderDate}&filter_type=all`;
+        
+        const data = await apiRequest<MostOrderedFoodResponse>(
+          endpoint,
+          {
+            method: "GET",
+            token: token || undefined,
+          }
+        );
+        // Limit to 10 items
+        setMostOrderedFood(data.mostOrderedFood.slice(0, 10));
+      } catch (error) {
+        console.error("Failed to fetch most ordered food:", error);
+        setMostOrderedFood([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMostOrderedFood();
+  }, []);
 
   return (
     <PageWrapper>
@@ -294,16 +369,24 @@ export default function Dashboard() {
             <FavoriteMenuLarge>
               <TableHeader>Favorite Menu per Week</TableHeader>
 
-            {/* masih hardcoded, sambung bagian ini ke backend */}
-            <FavMenuCard>
-              <div style={{ fontWeight: 600, fontSize: "17px" }}>Ultimate Hero Feast</div>
-              <div style={{ opacity: 0.8 }}>Total pesanan: -</div>
-            </FavMenuCard>
-
-            <FavMenuCard>
-              <div style={{ fontWeight: 600, fontSize: "17px" }}>Speed Runner Combo</div>
-              <div style={{ opacity: 0.8 }}>Total pesanan: -</div>
-            </FavMenuCard>
+              <FavMenuContainer>
+                {isLoading ? (
+                  <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                    Loading...
+                  </div>
+                ) : mostOrderedFood.length > 0 ? (
+                  mostOrderedFood.map((item) => (
+                    <FavMenuCard key={item.foodId}>
+                      <FavMenuTitle>#{item.rank} {item.foodName}</FavMenuTitle>
+                      <FavMenuCount>Total pesanan: {item.totalOrders}</FavMenuCount>
+                    </FavMenuCard>
+                  ))
+                ) : (
+                  <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                    No data available
+                  </div>
+                )}
+              </FavMenuContainer>
             </FavoriteMenuLarge>
 
             {/* AVERAGE NUTRITION CARD */}
