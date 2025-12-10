@@ -1,19 +1,13 @@
-// deliveryStatus.tsx (fixed)
+// deliveryStatus.tsx (clean + updated)
 import BottomNav from "@/components/bottomNavigation";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Picker } from "@react-native-picker/picker";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import { Platform, TouchableOpacity } from "react-native";
 import styled from "styled-components/native";
-import {
-  createDeliverySchedule,
-  getProvinces,
-  getSchools,
-} from "../lib/api";
+import { createDeliverySchedule } from "../lib/api";
 
-// styled components (kept as you had them)
+// styled components
 const Container = styled.View`
   flex: 1;
   background-color: white;
@@ -21,7 +15,6 @@ const Container = styled.View`
   align-items: center;
 `;
 
-// ... (other styled components unchanged)
 const Title = styled.Text`
   font-size: 26px;
   font-family: "Fredoka-Bold";
@@ -48,19 +41,6 @@ const Box = styled.View`
   margin-top: 10px;
 `;
 
-const PickerRow = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-`;
-
-const StyledPicker = styled(Picker)`
-  width: 48%;
-  height: 40px;
-  border-radius: 30px;
-  border: 2px rgba(69, 162, 70, 0.5) solid;
-  background-color: white;
-`;
-
 const InfoText = styled.Text`
   font-family: "Fredoka-Regular";
   font-size: 14px;
@@ -70,7 +50,8 @@ const InfoText = styled.Text`
 
 const Option = styled.TouchableOpacity<{ isSelected: boolean }>`
   width: 100%;
-  background-color: ${(p: any) => (p.isSelected ? "#d8ffdb" : "white")};
+  background-color: ${(props: { isSelected: boolean }) =>
+    props.isSelected ? "#d8ffdb" : "white"};
   border-radius: 5px;
   border: 2px rgba(69, 162, 70, 0.5) solid;
   padding: 8px 10px;
@@ -136,99 +117,36 @@ const BackArrow = styled.Text`
 export default function DeliveryStatus() {
   const router = useRouter();
 
-  // backend lists
-  const [provinceList, setProvinceList] = useState<any[]>([]);
-  const [allSchools, setAllSchools] = useState<any[]>([]); // raw schools from API
-  const [schoolList, setSchoolList] = useState<any[]>([]); // filtered by province
+  // ⬅ NEW: get params from plateScan.tsx
+  const { studentName, schoolName, plateCode } = useLocalSearchParams();
 
-  // driver list: backend endpoint for a list isn't available in api.js; keep placeholder array for now
+  // driver
   const [driverList, setDriverList] = useState<any[]>([]);
+  const [selectedService, setSelectedService] = useState<any>(null);
 
-  // selection state (declare variables that were missing)
-  const [selectedCity, setSelectedCity] = useState<string>("City"); // this stores locationId as string for filtering
-  const [selectedSchool, setSelectedSchool] = useState<string>("School");
-  const [selectedService, setSelectedService] = useState<string | number | null>(null);
-
-  // date & time pickers
+  // date & time
   const [deliveryDate, setDeliveryDate] = useState<Date>(new Date());
   const [time, setTime] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
 
-  // load provinces and schools on mount
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const provRaw = await getProvinces();
-        setProvinceList(provRaw || []);
-
-        const schRaw = await getSchools();
-        setAllSchools(schRaw || []);
-
-        // driverList: since there's no getDriversByCatering in api.js currently,
-        // keep driverList empty or use placeholder (you can replace once API is ready)
-        // setDriverList([{ driverId: 1, driverName: "John Driver" }]);
-      } catch (err) {
-        console.log("Error loading delivery setup:", err);
-      }
-    };
-
-    fetchInitialData();
-  }, []);
-
-  // when user selects province (city), filter schools
-  const handleSelectCity = (locationIdValue: string) => {
-    setSelectedCity(locationIdValue);
-
-    // filter allSchools by schoolLocationId === Number(locationIdValue)
-    const filtered = allSchools.filter(
-      (s: any) => String(s.schoolLocationId) === String(locationIdValue)
-    );
-    setSchoolList(filtered);
-    // reset selected school
-    setSelectedSchool("School");
-  };
-
-  // date/time handlers
-  const onDateChange = (_: any, selected?: Date) => {
-    setShowDatePicker(false);
-    if (selected) setDeliveryDate(selected);
-  };
-
-  const onTimeChange = (_: any, selected?: Date) => {
-    setShowTimePicker(false);
-    if (selected) setTime(selected);
-  };
-
-  // helpers to format date/time for backend
-  const formatDate = (d: Date) => {
-    // format YYYY-MM-DD
-    return d.toISOString().split("T")[0];
-  };
-
+  // format helpers
+  const formatDate = (d: Date) => d.toISOString().split("T")[0];
   const formatTime = (t: Date) => {
-    // format HH:mm:ss or HH:mm
     const hh = t.getHours().toString().padStart(2, "0");
     const mm = t.getMinutes().toString().padStart(2, "0");
     return `${hh}:${mm}:00`;
   };
 
-  // start delivery (call backend createDeliverySchedule)
+  // start delivery
   const handleStartDelivery = async () => {
     try {
-      const cateringIdStr = await AsyncStorage.getItem("cateringId");
-      if (!cateringIdStr) throw new Error("cateringId not found in storage");
-      const cateringId = Number(cateringIdStr);
-
-      // currently only have createDeliverySchedule(cateringId, pickUpDate, pickUpTime)
       const pickUpDate = formatDate(deliveryDate);
       const pickUpTime = formatTime(time);
 
-      const resp = await createDeliverySchedule(cateringId, pickUpDate, pickUpTime);
-
+      const resp = await createDeliverySchedule(pickUpDate, pickUpTime);
       console.log("createDeliverySchedule response:", resp);
 
-      // navigate to deliveryProgress
       router.push("/deliveryProgress");
     } catch (err) {
       console.error("Error creating delivery:", err);
@@ -246,47 +164,16 @@ export default function DeliveryStatus() {
       <SectionLabel>FILL IN DELIVERY DETAIL</SectionLabel>
 
       <Box>
-        <SectionLabel>SELECT DESTINATION</SectionLabel>
+        {/* --- SELECT DESTINATION (Revised) --- */}
+        <SectionLabel>DELIVERY DESTINATION</SectionLabel>
 
-        {/* Dropdown Picker */}
-        <PickerRow>
-          <StyledPicker
-            selectedValue={selectedCity}
-            onValueChange={(itemValue: any) => handleSelectCity(String(itemValue))}
-          >
-            <Picker.Item label="City" value="City" />
-            {provinceList.map((prov: any) => (
-              // province objects in your api.js are { province, locationId }
-              <Picker.Item
-                key={prov.locationId}
-                label={prov.province}
-                value={String(prov.locationId)}
-              />
-            ))}
-          </StyledPicker>
+        <InfoText>School : {schoolName ?? "-"}</InfoText>
+        <InfoText>Student : {studentName ?? "-"}</InfoText>
+        <InfoText>Plate : {plateCode ?? "-"}</InfoText>
 
-          <StyledPicker
-            selectedValue={selectedSchool}
-            onValueChange={(value: any) => setSelectedSchool(String(value))}
-          >
-            <Picker.Item label="School" value="School" />
-            {schoolList.map((school: any) => (
-              <Picker.Item
-                key={school.schoolId}
-                label={school.schoolName}
-                value={school.schoolName}
-              />
-            ))}
-          </StyledPicker>
-        </PickerRow>
-
-        <InfoText>City : {selectedCity === "City" ? "-" : selectedCity}</InfoText>
-        <InfoText>School : {selectedSchool === "School" ? "-" : selectedSchool}</InfoText>
-
-        {/* DELIVERY SERVICE */}
+        {/* --- DELIVERY SERVICE (unchanged) --- */}
         <SectionLabel>DELIVERY SERVICE</SectionLabel>
 
-        {/* If driverList is available from backend later, map it; else show single Option */}
         {driverList.length > 0 ? (
           driverList.map((driver: any) => (
             <Option
@@ -308,10 +195,10 @@ export default function DeliveryStatus() {
           </Option>
         )}
 
-        {/* SCHEDULE */}
+        {/* --- SCHEDULE (unchanged) --- */}
         <SectionLabel>SET SCHEDULE FOR DELIVERY</SectionLabel>
 
-        {/* Date picker */}
+        {/* Date */}
         <TouchableOpacity onPress={() => setShowDatePicker(true)}>
           <TimeBox>
             <TimeText>{formatDate(deliveryDate)}</TimeText>
@@ -323,11 +210,14 @@ export default function DeliveryStatus() {
             value={deliveryDate}
             mode="date"
             display={Platform.OS === "ios" ? "spinner" : "calendar"}
-            onChange={onDateChange}
+            onChange={(_, selected) => {
+              setShowDatePicker(false);
+              if (selected) setDeliveryDate(selected);
+            }}
           />
         )}
 
-        {/* Time picker */}
+        {/* Time */}
         <TouchableOpacity
           onPress={() => setShowTimePicker(true)}
           style={{ marginTop: 8 }}
@@ -346,7 +236,10 @@ export default function DeliveryStatus() {
             mode="time"
             is24Hour={true}
             display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={onTimeChange}
+            onChange={(_, selected) => {
+              setShowTimePicker(false);
+              if (selected) setTime(selected);
+            }}
           />
         )}
       </Box>

@@ -159,7 +159,7 @@ const DeliveryList = () => {
               source={require("../assets/images/delivery-status.png")}
               resizeMode="contain"
             />
-            <StartButton onPress={() => router.push("/deliveryStatus")}>
+            <StartButton onPress={() => router.push("/orderList")}>
               <StartText>MAKE DELIVERY</StartText>
             </StartButton>
           </>

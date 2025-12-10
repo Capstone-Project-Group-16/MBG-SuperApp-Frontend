@@ -1,6 +1,6 @@
 import BottomNav from "@/components/bottomNavigation";
 import { Picker } from "@react-native-picker/picker";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-
 import { getProvinces, getSchools, getStudentsBySchool } from "../lib/api";
 
 // data types
@@ -215,21 +214,41 @@ export default function OrderList() {
   };
 
   const renderStudentItem: ListRenderItem<StudentDisplay> = ({ item }) => {
-    return (
-      <View style={styles.row}>
-        <Text style={styles.cell}>{item.name}</Text>
-        <Text style={styles.cell}>{item.food ?? "-"}</Text>
-        <Text
-          style={[
-            styles.status,
-            item.status === "Complete" ? styles.complete : styles.incomplete,
-          ]}
+  const hasOrder = item.food && item.food !== "-";
+
+  return (
+    <View style={styles.row}>
+      <Text style={styles.cell}>{item.name}</Text>
+      <Text style={styles.cell}>{item.food ?? "-"}</Text>
+
+      {/* STATUS COLUMN */}
+      {hasOrder ? (
+        <TouchableOpacity
+          onPress={() => {
+            // Navigate to plateScan.tsx
+            router.push({
+              pathname: "/plateScan",
+              params: { studentId: item.id, food: item.food },
+            });
+          }}
+          style={{ flex: 1 }}
         >
-          {item.status}
-        </Text>
-      </View>
-    );
-  };
+          <Text
+            style={[
+              styles.status,
+              { color: "#2F5D2B", textDecorationLine: "underline" }
+            ]}
+          >
+            Assign Delivery
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <Text style={[styles.status]}>-</Text>
+      )}
+    </View>
+  );
+};
+
 
   const listData = viewLevel === "school" ? filteredSchools : filteredStudents;
   const listRender =
