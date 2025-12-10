@@ -64,6 +64,16 @@ interface LeaderboardResponse {
   total: number;
 }
 
+interface WasteStatsResponse {
+  totalRecords: number;
+  averageWastePercentage: number;
+  records: Array<{
+    foodWastePercentageId: number;
+    orderId: number;
+    wastePercentage: number;
+  }>;
+}
+
 const PageWrapper = styled.div`
   width: 100vw;
   height: 100vh;
@@ -347,8 +357,15 @@ const SmallStatCard = styled.div`
   color: black;
 `;
 
+const BottomRow = styled.div`
+  display: flex;
+  gap: 25px;
+  width: 100%;
+  margin-top: 35px;
+`;
+
 const LeaderboardSection = styled.div`
-  width: calc((100% - 25px) / 2);
+  flex: 1;
   background: white;
   border-radius: 30px;
   border: 2px solid rgba(69, 162, 70, 0.5);
@@ -428,12 +445,78 @@ const ViewMoreLink = styled(Link)`
   }
 `;
 
+const WasteCard = styled.div`
+  flex: 1;
+  background: white;
+  border-radius: 30px;
+  border: 2px solid rgba(255, 107, 107, 0.5);
+  padding: 20px 25px;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height: 600px;
+  overflow-y: auto;
+`;
+
+const WasteTableHeader = styled.div`
+  width: 100%;
+  background: #ffe5e5;
+  border: 1px solid #ff6b6b;
+  border-radius: 30px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+  font-weight: 700;
+  color: black;
+  margin-bottom: 18px;
+`;
+
+const WasteStatsDisplay = styled.div`
+  text-align: center;
+  margin-bottom: 16px;
+
+  div:first-child {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 6px;
+  }
+
+  div:last-child {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ff6b6b;
+  }
+`;
+
+const ViewMoreWasteLink = styled(Link)`
+  align-self: center;
+  margin-top: 15px;
+  padding: 8px 16px;
+  background: #ff6b6b;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #ff5252;
+  }
+`;
+
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mostOrderedFood, setMostOrderedFood] = useState<MostOrderedFood[]>([]);
   const [nutrition, setNutrition] = useState<Nutrition | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [wasteAverage, setWasteAverage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -446,8 +529,9 @@ export default function Dashboard() {
         const foodEndpoint = `${API_ENDPOINTS.FOOD_DEMAND.MOST_ORDERED}?order_date=${orderDate}&filter_type=all`;
         const nutritionEndpoint = `${API_ENDPOINTS.FOOD_DEMAND.AVERAGE_NUTRITION}?order_date=${orderDate}&filter_type=all`;
         const leaderboardEndpoint = `${API_ENDPOINTS.LEADERBOARD.GET}?filter_type=all`;
+        const wasteEndpoint = `${API_ENDPOINTS.WASTE_STATS.ALL}?limit=1000`;
         
-        const [foodData, nutritionData, leaderboardData] = await Promise.all([
+        const [foodData, nutritionData, leaderboardData, wasteData] = await Promise.all([
           apiRequest<MostOrderedFoodResponse>(foodEndpoint, {
             method: "GET",
             token: token || undefined,
@@ -460,17 +544,23 @@ export default function Dashboard() {
             method: "GET",
             token: token || undefined,
           }),
+          apiRequest<WasteStatsResponse>(wasteEndpoint, {
+            method: "GET",
+            token: token || undefined,
+          }),
         ]);
         
         // Limit to 10 items
         setMostOrderedFood(foodData.mostOrderedFood.slice(0, 10));
         setNutrition(nutritionData.data);
         setLeaderboard(leaderboardData.leaderboard.slice(0, 10));
+        setWasteAverage(wasteData.averageWastePercentage);
       } catch (error) {
         console.error("Failed to fetch data:", error);
         setMostOrderedFood([]);
         setNutrition(null);
         setLeaderboard([]);
+        setWasteAverage(0);
       } finally {
         setIsLoading(false);
       }
@@ -594,36 +684,65 @@ export default function Dashboard() {
             </NutritionCard>
           </TopRow>
 
-          {/* LEADERBOARD SECTION */}
-          <LeaderboardSection style={{ marginTop: "35px" }}>
-            <TableHeader>Top 10 Student Leaderboard</TableHeader>
+          {/* LEADERBOARD & WASTE STATS SECTION */}
+          <BottomRow>
+            <LeaderboardSection>
+              <TableHeader>Top 10 Student Leaderboard</TableHeader>
 
-            {isLoading ? (
-              <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
-                Loading...
-              </div>
-            ) : leaderboard.length > 0 ? (
-              <>
-                <LeaderboardTable>
-                  <tbody>
-                    {leaderboard.map((entry) => (
-                      <tr key={entry.studentProfileId}>
-                        <LeaderboardRank>{entry.rank}</LeaderboardRank>
-                        <LeaderboardName>{entry.userFullName}</LeaderboardName>
-                        <LeaderboardSchool>{entry.schoolName}</LeaderboardSchool>
-                        <LeaderboardPoints>{entry.expPoints.toLocaleString()}</LeaderboardPoints>
-                      </tr>
-                    ))}
-                  </tbody>
-                </LeaderboardTable>
-                <ViewMoreLink to="/leaderboard">View Full Leaderboard →</ViewMoreLink>
-              </>
-            ) : (
-              <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
-                No leaderboard data available
-              </div>
-            )}
-          </LeaderboardSection>
+              {isLoading ? (
+                <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                  Loading...
+                </div>
+              ) : leaderboard.length > 0 ? (
+                <>
+                  <LeaderboardTable>
+                    <tbody>
+                      {leaderboard.map((entry) => (
+                        <tr key={entry.studentProfileId}>
+                          <LeaderboardRank>{entry.rank}</LeaderboardRank>
+                          <LeaderboardName>{entry.userFullName}</LeaderboardName>
+                          <LeaderboardSchool>{entry.schoolName}</LeaderboardSchool>
+                          <LeaderboardPoints>{entry.expPoints.toLocaleString()}</LeaderboardPoints>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </LeaderboardTable>
+                  <ViewMoreLink to="/leaderboard">View Full Leaderboard →</ViewMoreLink>
+                </>
+              ) : (
+                <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                  No leaderboard data available
+                </div>
+              )}
+            </LeaderboardSection>
+
+            {/* WASTE STATS SECTION */}
+            <WasteCard>
+              <WasteTableHeader>Average Food Waste</WasteTableHeader>
+
+              {isLoading ? (
+                <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                  Loading...
+                </div>
+              ) : wasteAverage > 0 ? (
+                <>
+                  <WasteStatsDisplay>
+                    <div style={{ fontSize: "48px", fontWeight: "bold", color: "#ff6b6b" }}>
+                      {wasteAverage.toFixed(2)}%
+                    </div>
+                    <div style={{ fontSize: "14px", color: "#666", marginTop: "8px" }}>
+                      Average Waste Percentage
+                    </div>
+                  </WasteStatsDisplay>
+                  <ViewMoreWasteLink to="/waste-stats">View Detailed Stats →</ViewMoreWasteLink>
+                </>
+              ) : (
+                <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                  No waste data available
+                </div>
+              )}
+            </WasteCard>
+          </BottomRow>
 
           <SectionRow></SectionRow>
 

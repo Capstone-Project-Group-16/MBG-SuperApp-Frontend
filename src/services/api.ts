@@ -14,6 +14,9 @@ export const API_ENDPOINTS = {
   LEADERBOARD: {
     GET: "/account/student-profile/leaderboard",
   },
+  WASTE_STATS: {
+    ALL: "/mbg-food-waste-tracker/food-analyzer/waste-stats/all",
+  },
 };
 
 // Helper function to make API requests
