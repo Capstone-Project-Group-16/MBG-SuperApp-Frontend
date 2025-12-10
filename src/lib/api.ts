@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const DEFAULT_LOCAL_BASE_URL =
   Platform.OS === "web"
     ? "http://localhost:8000"      
-    : "http://192.168.1.178:8000";   
+    : "https://9ee26450f95f.ngrok-free.app";   
 
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_LOCAL_BASE_URL;
