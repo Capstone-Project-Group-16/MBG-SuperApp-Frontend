@@ -291,69 +291,6 @@ const FavMenuCount = styled.div`
   font-size: 13px;
   color: #555;
 `;
-// ---
-
-const SectionRow = styled.div`
-  display: flex;
-  gap: 25px;
-  margin-top: 30px;
-`;
-
-const CardLarge = styled.div`
-  flex: 1;
-  background: white;
-  border-radius: 30px;
-  border: 2px solid rgba(69, 162, 70, 0.5);
-  padding: 20px 25px;
-  color: black;
-`;
-
-// const TimeStamp = styled.div`
-//   font-size: 10px;
-//   margin-top: 4px;
-//   opacity: 0.7;
-//   color: black;
-// `;
-
-const StatLabel = styled.div`
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 14px;
-  color: black;
-  text-align: center;
-`;
-
-const StatValue = styled.div`
-  font-size: 32px;
-  font-weight: 700;
-  color: #45a246;
-  text-align: center;
-`;
-
-const StatsRow = styled.div`
-  display: flex;
-  gap: 20px;
-  margin-top: 20px;
-`;
-
-const SmallStatCard = styled.div`
-  flex: 1;
-  background: white;
-  border-radius: 20px;
-  border: 1px solid #45a246;
-  padding: 25px;
-  min-height: 110px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 15px;
-
-  font-size: 16px;
-  font-weight: 600;
-  color: black;
-`;
 
 const BottomRow = styled.div`
   display: flex;
@@ -619,7 +556,10 @@ export default function Dashboard() {
 
             {/* FAVORITE MENU PER WEEK */}
             <FavoriteMenuLarge>
-              <TableHeader>Favorite Menu per Week</TableHeader>
+              <TableHeader>
+                Favorite Menu per Week
+                <ArrowButton to="/favorite-food">→</ArrowButton>
+              </TableHeader>
 
               <FavMenuContainer>
                 {isLoading ? (
@@ -643,7 +583,10 @@ export default function Dashboard() {
 
             {/* AVERAGE NUTRITION CARD */}
             <NutritionCard>
-              <TableHeader>Average Nutrition</TableHeader>
+              <TableHeader>
+                Average Nutrition
+                <ArrowButton to="/average-nutrition">→</ArrowButton>
+              </TableHeader>
 
               {nutrition ? (
                 <BarWrapper>
@@ -763,38 +706,6 @@ export default function Dashboard() {
               )}
             </WasteCard>
           </BottomRow>
-
-          <SectionRow></SectionRow>
-
-          <CardLarge style={{ marginTop: "35px" }}>
-            <TableHeader>This Week's Statistic</TableHeader>
-
-            <StatsRow>
-
-                {/* Total hasil distribusi */}
-                <SmallStatCard>
-                <StatLabel>Total Hasil Distribusi</StatLabel>
-                {/* API: total hasil distribusi */}
-                <StatValue>0</StatValue>
-                </SmallStatCard>
-
-                {/* Total sekolah */}
-                <SmallStatCard>
-                <StatLabel>Total Sekolah per Kota yang Sudah Menerima MBG</StatLabel>
-                {/* API: total sekolah */}
-                <StatValue>0</StatValue>
-                </SmallStatCard>
-
-                {/* Kota tertunda */}
-                <SmallStatCard>
-                <StatLabel>Kota Tertunda atau Gagal</StatLabel>
-                {/* API: kota tertunda/gagal */}
-                <StatValue>0</StatValue>
-                </SmallStatCard>
-
-            </StatsRow>
-            </CardLarge>
-
 
         </MainContent>
       </ContentWrapper>
