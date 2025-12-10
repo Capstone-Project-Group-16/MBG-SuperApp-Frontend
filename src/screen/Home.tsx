@@ -65,6 +65,21 @@ export default function HomeScreen({ navigation, route }: Props) {
         const stored = await AsyncStorage.getItem("lastOrderId");
         if (stored) {
           setLastOrderId(Number(stored));
+        } else if (studentProfileId) {
+          // If not in AsyncStorage, fetch from API
+          const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
+            method: "GET",
+          });
+          
+          if (res.ok && data?.orders && data.orders.length > 0) {
+            // Get the most recent order
+            const latestOrder = data.orders[0];
+            setLastOrderId(latestOrder.orderId || latestOrder.id);
+            // Save it for future use
+            if (latestOrder.orderId || latestOrder.id) {
+              await AsyncStorage.setItem("lastOrderId", String(latestOrder.orderId || latestOrder.id));
+            }
+          }
         }
       } catch (err) {
         console.warn("Failed to load lastOrderId", err);
@@ -72,7 +87,7 @@ export default function HomeScreen({ navigation, route }: Props) {
     };
 
     loadLastOrderId();
-  }, []);
+  }, [studentProfileId]);
 
   return (
     <SafeAreaView style={styles.root}>
@@ -109,7 +124,51 @@ export default function HomeScreen({ navigation, route }: Props) {
           title="Food Waste"
           description="Foto piringmu, lihat seberapa jago kamu ngabisin makan!"
           icon={require("../../assets/icon/food-waste.png")}
-          onPress={() => navigation.navigate("FoodScanner", { studentProfileId, scanMode: "waste" })}
+          onPress={async () => {
+            if (!lastOrderId) {
+              Alert.alert(
+                "Food Waste Tracker",
+                "Kamu belum punya riwayat order. Lakukan pemesanan makanan dulu sebelum tracking food waste ya! 😊"
+              );
+              return;
+            }
+            
+            // First, check if waste percentage already exists
+            try {
+              const { res, data } = await apiFetch(
+                `/api/mbg-food-waste-tracker/food-calculation/waste-percentage/${lastOrderId}`,
+                { method: "GET" }
+              );
+              
+              if (res.ok && data && data.wastePercentage !== undefined) {
+                // Data exists, go directly to FoodWaste screen
+                navigation.navigate("FoodWaste", {
+                  studentProfileId,
+                  orderId: lastOrderId,
+                  wastePercentage: data.wastePercentage,
+                  beforeArea: data.beforeArea,
+                  afterArea: data.afterArea,
+                });
+                return;
+              }
+            } catch (err) {
+              console.log("No existing waste data, continuing to scanner");
+            }
+            
+            // Check for saved waste tracking state (before or after)
+            let phase = "before";
+            try {
+              const savedPhase = await AsyncStorage.getItem(`wasteTracking_${lastOrderId}`);
+              if (savedPhase === "after") {
+                phase = "after";
+              }
+              console.log("Loaded saved phase:", phase);
+            } catch (err) {
+              console.warn("Failed to load saved state:", err);
+            }
+            
+            navigation.navigate("FoodScanner", { studentProfileId, orderId: lastOrderId, scanMode: "waste", phase })
+          }}
         />
         <View style={{ height: hp("3%") }} />
         <FeatureCard

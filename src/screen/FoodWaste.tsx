@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Image } from "react-native"
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Image, Alert } from "react-native"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
@@ -8,17 +8,34 @@ import SuggestionCard from "../components/SuggestionCard"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFValue } from "react-native-responsive-fontsize"
 import { useEffect, useState } from "react"
-import { apiFetch } from "../lib/api";
+import { apiFetch } from "../lib/api"
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "FoodWaste">
 
 export default function FoodWaste({ route, navigation }: Props) {
     const studentProfileId = route?.params?.studentProfileId
+    const orderId = route?.params?.orderId
+    const wastePercentage = route?.params?.wastePercentage ?? 0
     const [exp, setExp] = useState<string>("0")
     const [gems, setGems] = useState<string>("0")
+    
+    // Calculate consumed percentage (opposite of waste)
+    const consumedPercentage = 100 - wastePercentage
+
+    const getWasteSuggestion = (percentage: number) => {
+        if (percentage <= 10) {
+            return "Mantap! Kamu sudah menghabiskan hampir semua makananmu. Kebiasaan luar biasa ini membantu mengurangi food waste!"
+        } else if (percentage <= 30) {
+            return "Bagus! Kamu sudah menghabiskan " + Math.round(consumedPercentage) + "% makananmu. Teruskan usahamu untuk mengurangi food waste!"
+        } else if (percentage <= 50) {
+            return "Cukup baik. Kamu telah menghabiskan " + Math.round(consumedPercentage) + "% makananmu. Cobalah untuk makan lebih banyak agar tidak ada yang terbuang."
+        } else {
+            return "Kamu masih meninggalkan " + Math.round(percentage) + "% makananmu. Coba fokus untuk menghabiskan lebih banyak agar tidak ada food waste!"
+        }
+    }
+
     const [wasteData] = useState({
-        mealScore: 80,
-        suggestion: "Mantap! Kamu sudah menghabiskan 80% makananmu. Teruskan kebiasaan baik ini agar tubuh sehat dan makanan tidak terbuang sia-sia!",
         recommendations: [
             {
                 id: "1",
@@ -62,10 +79,23 @@ export default function FoodWaste({ route, navigation }: Props) {
         loadProfile()
     }, [studentProfileId])
 
+    const handleClose = async () => {
+        // Clear waste tracking state for this order
+        if (orderId) {
+            try {
+                await AsyncStorage.removeItem(`wasteTracking_${orderId}`);
+                console.log("Cleared waste tracking state for order:", orderId);
+            } catch (err) {
+                console.warn("Failed to clear waste tracking state:", err);
+            }
+        }
+        navigation.navigate("Home", { studentProfileId })
+    }
+
     return (
         <SafeAreaView style={styles.root}>
             <View style={styles.header}>
-                <Pressable accessibilityRole="button" onPress={() => navigation.navigate("Home", { studentProfileId })} style={styles.close}>
+                <Pressable accessibilityRole="button" onPress={handleClose} style={styles.close}>
                     <Image style={styles.closeIcon} source={require("../../assets/icon/close.png")} resizeMode="contain" />
                 </Pressable>
                 <View style={{ flex: 1 }} />
@@ -82,7 +112,7 @@ export default function FoodWaste({ route, navigation }: Props) {
 
                 <View style={styles.circleContainer}>
                     <CircularProgress
-                        value={wasteData.mealScore}
+                        value={consumedPercentage}
                         max={100}
                         unit="%"
                         gradientColors={[colors.gradDarkGreen, colors.gradLightGreen]}
@@ -91,10 +121,11 @@ export default function FoodWaste({ route, navigation }: Props) {
                         strokePercent={8}
                         valueFontSize={RFValue(30)}
                     />
+                    <Text style={styles.wasteSubtext}>Consumed</Text>
                 </View>
 
                 {/* Suggestion */}
-                <SuggestionCard label="Suggestion" text={wasteData.suggestion} />
+                <SuggestionCard label="Suggestion" text={getWasteSuggestion(wastePercentage)} />
 
                 {/* Recommendations */}
                 <Text style={styles.sectionTitle}>Recommendation</Text>
@@ -139,5 +170,6 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     circleContainer: { alignItems: "center", marginBottom: hp("3%"), gap: hp("1.5%") },
+    wasteSubtext: { fontSize: RFValue(14), color: colors.textGray, fontFamily: "Jost" },
     sectionTitle: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(20), color: colors.textBlack, marginLeft: hp("1.5%") },
 })
