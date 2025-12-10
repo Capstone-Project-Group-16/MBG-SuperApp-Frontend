@@ -1,50 +1,142 @@
 "use client"
 
-import { View, Text, StyleSheet, Animated, Pressable } from "react-native"
+import { View, Text, StyleSheet, Animated, Image, type ImageSourcePropType, Alert } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFValue } from "react-native-responsive-fontsize"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { colors } from "../theme/Color"
+import { apiFetch } from "../lib/api"
+import Button from "./Button"
 
-const WHEEL_SEGMENTS = [
-  { id: 1, label: "25 EXP", color: colors.nutriYellow, icon: "⚡" },
-  { id: 2, label: "40 GEMS", color: colors.nutriPink, icon: "💎" },
-  { id: 3, label: "15 EXP", color: colors.nutriBlue, icon: "⚡" },
-  { id: 4, label: "15 GEMS", color: colors.nutriGreen, icon: "💎" },
-  { id: 5, label: "25 EXP", color: colors.nutriYellow, icon: "⚡" },
-  { id: 6, label: "40 GEMS", color: colors.nutriPink, icon: "💎" },
-  { id: 7, label: "15 EXP", color: colors.nutriBlue, icon: "⚡" },
-  { id: 8, label: "15 GEMS", color: colors.nutriGreen, icon: "💎" },
-]
+type Segment = {
+  id: number
+  label: string
+  icon?: ImageSourcePropType
+}
 
-export default function SpinWheelComponent({
-  onSpin,
-  isSpinning,
-}: {
-  onSpin: (result: string) => void
+interface Props {
+  onSpin: (result: {
+    prizeId: number
+    prizeName: string
+    prizeType: string
+    studentExpPoints: number
+    studentMbgPoints: number
+  }) => void
   isSpinning: boolean
-}) {
-  const spinAnim = useRef(new Animated.Value(0)).current
-  const wheelSize = wp("70%")
-  const segmentAngle = 360 / WHEEL_SEGMENTS.length
+  segments: Segment[]
+  studentProfileId: number
+}
 
-  const handleSpin = () => {
+export default function SpinWheelItem({ onSpin, isSpinning, segments, studentProfileId }: Props) {
+  const spinAnim = useRef(new Animated.Value(0)).current
+  const [spinning, setSpinning] = useState(false)
+  const segmentAngle = 360 / segments.length
+  const visualCorrection = 45
+
+  const OFFSETS = [
+    { x: wp("10%"), y: wp("4%") },
+    { x: wp("10%"), y: wp("4%") },
+    { x: wp("10%"), y: wp("4%") },
+    { x: wp("9%"), y: wp("6%") },
+    { x: wp("9%"), y: wp("6%") },
+    { x: wp("11%"), y: wp("6%") },
+    { x: wp("11%"), y: wp("6%") },
+    { x: wp("9%"), y: wp("6%") },
+  ]
+
+  const handleSpin = async () => {
     if (isSpinning) return
 
-    const randomSpins = Math.floor(Math.random() * 5) + 5
-    const randomSegment = Math.floor(Math.random() * WHEEL_SEGMENTS.length)
-    const totalRotation = randomSpins * 360 + randomSegment * segmentAngle
+    setSpinning(true)
 
-    spinAnim.setValue(0)
+    try {
+      const { res, data } = await apiFetch("/api/mbg-food-gamification/food-prize/spin", {
+        method: "POST",
+      })
 
-    Animated.timing(spinAnim, {
-      toValue: totalRotation,
-      duration: 3000,
-      useNativeDriver: true,
-    }).start(() => {
-      const winningSegment = WHEEL_SEGMENTS[randomSegment]
-      onSpin(winningSegment.label)
-    })
+      if (!res.ok) {
+        Alert.alert("Error", data?.message || "Failed to spin the wheel")
+        setSpinning(false)
+        return
+      }
+
+      const normalize = (s?: string) =>
+        (s ?? "").toString().toLowerCase().trim()
+
+      function findSegmentIndexForPrize(prize: { prizeName: string, prizeType: string }, segments: Segment[]) {
+        const name = normalize(prize.prizeName)        
+        const type = normalize(prize.prizeType) 
+
+        if (type.includes("sticker")) {
+          const stickerIndexes = segments
+            .map((s, i) => (normalize(s.label).includes("sticker") ? i : -1))
+            .filter(i => i !== -1)
+          if (stickerIndexes.length > 0) {
+            return stickerIndexes[Math.floor(Math.random() * stickerIndexes.length)]
+          }
+          return -1
+        }
+
+        for (let i = 0; i < segments.length; i++) {
+          const segLabel = normalize(segments[i].label)
+          const segParts = segLabel.split(/\s+/) 
+          const nameParts = name.split(/\s+/)   
+
+          if (segParts.length >= 2 && nameParts.length >= 2) {
+            const segNumber = segParts[0]
+            const segUnit = segParts[1]        
+            const nameNumber = nameParts[0]
+            const prizeUnitFromType = type.includes("exp") ? "exp"
+              : type.includes("mbg") ? "mbg"
+                : nameParts[1] 
+
+            if (segNumber === nameNumber && segUnit.includes(prizeUnitFromType)) {
+              return i
+            }
+          }
+        }
+
+        const fallbackIndex = segments.findIndex(s =>
+          normalize(s.label).includes(name) || name.includes(normalize(s.label))
+        )
+        if (fallbackIndex !== -1) return fallbackIndex
+
+        return -1
+      }
+
+      const wonPrizeIndex = findSegmentIndexForPrize(data.prize, segments)
+
+      if (wonPrizeIndex === -1) {
+        Alert.alert("Error", "Prize not mapped to wheel segment")
+        setSpinning(false)
+        return
+      }
+
+      const targetAngle = wonPrizeIndex * segmentAngle + segmentAngle / 2
+      const randomSpins = Math.floor(Math.random() * 5) + 5
+      const totalRotation =  randomSpins * 360 + wonPrizeIndex * segmentAngle + segmentAngle / 2 + visualCorrection
+
+      spinAnim.setValue(0)
+
+      Animated.timing(spinAnim, {
+        toValue: totalRotation,
+        duration: 3000,
+        useNativeDriver: true,
+      }).start(() => {
+        setSpinning(false)
+        onSpin({
+          prizeId: data.prize?.prizeId,
+          prizeName: data.prize?.prizeName,
+          prizeType: data.prize?.prizeType,
+          studentExpPoints: data.studentExpPoints,
+          studentMbgPoints: data.studentMbgPoints,
+        })
+      })
+    } catch (err) {
+      console.error("[v0] Spin error:", err)
+      Alert.alert("Error", "Failed to spin the wheel")
+      setSpinning(false)
+    }
   }
 
   const spinStyle = {
@@ -53,119 +145,140 @@ export default function SpinWheelComponent({
         rotate: spinAnim.interpolate({
           inputRange: [0, 360],
           outputRange: ["0deg", "360deg"],
+          extrapolate: "extend",
         }),
       },
     ],
   }
 
   return (
-    <View style={styles.container}>
-      {/* Pointer */}
-      <View style={styles.pointer} />
+    <View style={styles.root}>
+      <View style={styles.container}>
+        {/* Wheel pointer */}
+        <View style={styles.pointerContainer}>
+          <Image source={require("../../assets/icon/pointer-wheel.png")} style={styles.pointerImage} resizeMode="contain" />
+        </View>
 
-      {/* Animated Wheel */}
-      <Animated.View style={[styles.wheelContainer, spinStyle]}>
-        <View style={[styles.wheel, { width: wheelSize, height: wheelSize }]}>
-          {WHEEL_SEGMENTS.map((segment, idx) => {
-            const rotation = idx * segmentAngle
+        {/* Wheel stand */}
+        <View style={styles.standContainer}>
+          <Image source={require("../../assets/icon/stand-wheel.png")} style={styles.standImage} resizeMode="contain" />
+        </View>
+
+        {/* Animated wheel circle */}
+        <Animated.View style={[styles.rotatingContainer, spinStyle]}>
+          <Image
+            source={require("../../assets/icon/circle-wheel.png")}
+            style={styles.circleImage}
+            resizeMode="contain"
+          />
+
+          {/* Segments */}
+          {segments.map((segment, idx) => {
+            const offset = OFFSETS[idx] ?? { x: 0, y: 0 }
+
             return (
               <View
                 key={segment.id}
                 style={[
                   styles.segment,
                   {
-                    backgroundColor: segment.color,
-                    transform: [{ rotate: `${rotation}deg` }],
+                    transform: [{ rotate: `${idx * segmentAngle}deg` }],
                   },
                 ]}
               >
-                <Text style={styles.segmentText}>{segment.icon}</Text>
-                <Text style={styles.segmentLabel}>{segment.label}</Text>
+                <View
+                  style={{
+                    transform: [
+                      { translateX: offset.x },
+                      { translateY: offset.y },
+                      { rotate: `${-idx * segmentAngle}deg` },
+                    ],
+                    alignItems: "center",
+                  }}
+                >
+                  {segment.icon && <Image source={segment.icon} style={styles.segmentIcon} resizeMode="contain" />}
+                  <Text style={styles.segmentLabel}>{segment.label}</Text>
+                </View>
               </View>
             )
           })}
-        </View>
-      </Animated.View>
-
-      {/* Stand */}
-      <View style={styles.stand} />
+        </Animated.View>
+      </View>
 
       {/* Spin Button */}
-      <Pressable
-        style={({ pressed }) => [styles.spinButton, pressed && { opacity: 0.8 }]}
-        onPress={handleSpin}
-        disabled={isSpinning}
-      >
-        <Text style={styles.spinButtonText}>💎 5 GEMS</Text>
-      </Pressable>
+      <View style={styles.buttonContainer}>
+        <Button title="500 GEMS" onPress={handleSpin} disabled={isSpinning} style={{ width: wp("90%") }} />
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  root: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
   container: {
+    width: "100%",
+    height: wp("100%"),
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: hp("3%"),
+    position: "relative",
   },
-  pointer: {
-    width: wp("6%"),
-    height: hp("3%"),
-    backgroundColor: colors.brandGrey,
-    borderRadius: wp("1%"),
+  pointerContainer: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: hp("37%"),
     zIndex: 10,
-    marginBottom: hp("-1.5%"),
   },
-  wheelContainer: {
+  pointerImage: {
+    width: wp("20%"),
+    height: wp("20%"),
+  },
+  rotatingContainer: {
+    width: wp("80%"),
+    height: wp("80%"),
     alignItems: "center",
     justifyContent: "center",
   },
-  wheel: {
-    borderRadius: wp("35%"),
-    borderWidth: wp("3.5%"),
-    borderColor: colors.brandOrange,
-    overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.white,
+  circleImage: {
+    width: "140%",
+    height: "140%",
   },
   segment: {
     position: "absolute",
     width: "100%",
     height: "100%",
-    justifyContent: "flex-start",
     alignItems: "center",
-    paddingTop: wp("8%"),
+    paddingTop: wp("10%"),
+    paddingLeft: wp("18%"),
   },
-  segmentText: {
-    fontSize: RFValue(20),
+  segmentIcon: {
+    width: wp("7%"),
+    height: wp("7%"),
   },
   segmentLabel: {
-    fontSize: RFValue(12),
-    fontFamily: "Fredoka-SemiBold",
+    fontSize: RFValue(10),
+    fontFamily: "Fredoka-Medium",
     color: colors.textBlack,
-    marginTop: hp("0.5%"),
+    marginTop: hp("1%"),
     textAlign: "center",
   },
-  stand: {
-    width: wp("15%"),
-    height: hp("4%"),
-    backgroundColor: colors.textBlack,
-    borderRadius: wp("2%"),
-    marginTop: hp("1%"),
-  },
-  spinButton: {
-    marginTop: hp("3%"),
-    paddingHorizontal: wp("8%"),
-    paddingVertical: hp("2%"),
-    backgroundColor: colors.brandGreen,
-    borderRadius: wp("8%"),
+  standContainer: {
+    position: "absolute",
+    bottom: -wp("15%"),
     alignItems: "center",
+    justifyContent: "center",
   },
-  spinButtonText: {
-    fontSize: RFValue(18),
-    fontFamily: "Fredoka-SemiBold",
-    color: colors.white,
-    letterSpacing: 0.5,
+  standImage: {
+    width: wp("40%"),
+    height: wp("40%"),
+  },
+  buttonContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: hp("10.5%"),
   },
 })

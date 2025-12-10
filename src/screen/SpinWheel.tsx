@@ -14,44 +14,69 @@ import NavBar from "../components/NavBar"
 
 type Props = NativeStackScreenProps<RootStackParamList, "SpinWheel">
 
+interface Prize {
+    prizeId: number
+    prizeName: string
+    prizeDescription: string
+    prizeType: string
+    prizeImageLink: string | null
+}
+
 export default function SpinWheelScreen({ navigation, route }: Props) {
     const studentProfileId = route?.params?.studentProfileId
     const [exp, setExp] = useState<string>("0")
     const [gems, setGems] = useState<string>("0")
     const [isSpinning, setIsSpinning] = useState(false)
-    const [lastReward, setLastReward] = useState<string | null>(null)
+    const [prizes, setPrizes] = useState<Prize[]>([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const loadProfile = async () => {
-            if (!studentProfileId) {
-                console.warn("studentProfileId tidak ada di route params")
-                return
-            }
-
+        const loadData = async () => {
+            setLoading(true)
             try {
-                const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
-                    method: "GET",
-                })
+                if (studentProfileId) {
+                    const { res: profileRes, data: profileData } = await apiFetch(
+                        `/api/account/student-profile/get/${studentProfileId}`,
+                        { method: "GET" },
+                    )
 
-                if (!res.ok) {
-                    console.log("Gagal fetch student profile:", data)
-                    return
+                    if (profileRes.ok) {
+                        setExp(String(profileData?.expPoints ?? "0"))
+                        setGems(String(profileData?.mbgPoints ?? "0"))
+                    }
                 }
-
-                setExp(String(data?.expPoints ?? "0"))
-                setGems(String(data?.mbgPoints ?? "0"))
             } catch (err) {
-                console.log("Error fetch student profile:", err)
+                console.log("[v0] Error loading data:", err)
+            } finally {
+                setLoading(false)
             }
         }
 
-        loadProfile()
+        loadData()
     }, [studentProfileId])
 
-    const handleSpin = (reward: string) => {
+    const WHEEL_SEGMENTS = [
+        { id: 1, label: "100 Exp", icon: require("../../assets/icon/thunder.png") },
+        { id: 2, label: "200 Exp", icon: require("../../assets/icon/thunder.png") },
+        { id: 3, label: "500 Exp", icon: require("../../assets/icon/thunder.png") },
+        { id: 4, label: "1000 Exp", icon: require("../../assets/icon/thunder.png") },
+        { id: 5, label: "200 MBG", icon: require("../../assets/icon/diamond.png") },
+        { id: 6, label: "800 MBG", icon: require("../../assets/icon/diamond.png") },
+        { id: 7, label: "Sticker", icon: require("../../assets/icon/sticker.png") },
+        { id: 8, label: "Sticker", icon: require("../../assets/icon/sticker.png") },
+    ];
+
+    const handleSpin = (result: {
+        prizeId: number
+        prizeName: string
+        prizeType: string
+        studentExpPoints: number
+        studentMbgPoints: number
+    }) => {
         setIsSpinning(false)
-        setLastReward(reward)
-        Alert.alert("🎉 Selamat!", `Anda memenangkan: ${reward}`)
+        setExp(String(result.studentExpPoints))
+        setGems(String(result.studentMbgPoints))
+        Alert.alert("🎉 Selamat!", `Anda memenangkan: ${result.prizeName}`, [{ text: "OK", onPress: () => { } }])
     }
 
     return (
@@ -73,13 +98,7 @@ export default function SpinWheelScreen({ navigation, route }: Props) {
             <Text style={styles.title}>Spin Wheel</Text>
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                <SpinWheelItem isSpinning={isSpinning} onSpin={handleSpin} />
-
-                {lastReward && (
-                    <View style={styles.rewardBox}>
-                        <Text style={styles.rewardText}>Reward Terakhir: {lastReward}</Text>
-                    </View>
-                )}
+                <SpinWheelItem isSpinning={isSpinning} onSpin={handleSpin} segments={WHEEL_SEGMENTS} studentProfileId={studentProfileId} />
             </ScrollView>
 
             <NavBar
@@ -125,20 +144,5 @@ const styles = StyleSheet.create({
         paddingHorizontal: wp("4%"),
         paddingVertical: hp("2%"),
         alignItems: "center",
-    },
-    rewardBox: {
-        marginTop: hp("3%"),
-        paddingHorizontal: wp("4%"),
-        paddingVertical: hp("2%"),
-        backgroundColor: colors.brandMint,
-        borderRadius: wp("3%"),
-        borderWidth: 2,
-        borderColor: colors.brandBorder,
-    },
-    rewardText: {
-        fontFamily: "Fredoka-Medium",
-        fontSize: RFValue(14),
-        color: colors.textBlack,
-        textAlign: "center",
     },
 })
