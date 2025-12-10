@@ -32,6 +32,7 @@ export default function LoginScreen() {
 
     await AsyncStorage.setItem("access_token", access_token);
     await AsyncStorage.setItem("user", JSON.stringify(user));
+    // await AsyncStorage.setItem('cateringId', data.userId);
 
     router.replace("/home");
 

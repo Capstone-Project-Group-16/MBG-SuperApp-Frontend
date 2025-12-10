@@ -3,10 +3,14 @@
 // kalo udah ada delivery, ada kayak list ongoing/completed (liat di figma)
 
 import BottomNav from "@/components/bottomNavigation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image } from "react-native";
 import styled from "styled-components/native";
+
+import { getDeliveryListByCatering } from "../lib/api";
+
 
 // styled components
 const Container = styled.View.attrs({
@@ -92,83 +96,119 @@ const StatusText = styled.Text`
   color: black;
 `;
 
-// ==== Component ====
 const DeliveryList = () => {
   const router = useRouter();
 
   const [deliveries, setDeliveries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const fetchDeliveries = async () => {
-  //     try {
-  //       // const response = await fetch("(API)");
-  //       // const data = await response.json();
-  //       // setDeliveries(data);
+  // Fetch delivery list
+  useEffect(() => {
+    const fetchDeliveries = async () => {
+      try {
+        setLoading(true);
 
-  //       console.log("Fetching delivery data from backend...");
-  //     } catch (error) {
-  //       console.log("Error fetching deliveries:", error);
-  //     }
-  //   };
+        // Ambil cateringId dari login
+        const cateringId = await AsyncStorage.getItem("cateringId");
 
-  //   fetchDeliveries();
-  // }, []);
+        if (!cateringId) {
+          console.log("No cateringId found");
+          setLoading(false);
+          return;
+        }
+
+        // Panggil API placeholder
+        const result = await getDeliveryListByCatering(Number(cateringId));
+
+        const mapped = result.map((item) => ({
+          id: item.deliveryId,
+          school: item.schoolName,
+          totalFood: item.totalFoodToBeDelivered,
+          time: item.pickUpTime,
+          date: item.pickUpDate,
+
+          // bisa diubah nanti kalo udah fix status delivery-nya
+          ongoing: true,
+          status: "Ongoing",
+        }));
+
+        setDeliveries(mapped);
+      } catch (error) {
+        console.log("Error fetching deliveries:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDeliveries();
+  }, []);
 
   const hasDeliveries = deliveries.length > 0;
 
   return (
     <Container>
       <ScrollArea showsVerticalScrollIndicator={false}>
-      <Title>Delivery Progress</Title>
+        <Title>Delivery Progress</Title>
 
-      {!hasDeliveries ? (
-        <>
-          <EmptyText>There’s no delivery going on in the mean time.</EmptyText>
-          <DeliveryImage
-            source={require("../assets/images/delivery-status.png")}
-            resizeMode="contain"
-          />
-          <StartButton onPress={() => router.push("/deliveryStatus")}>
-            <StartText>MAKE DELIVERY</StartText>
-          </StartButton>
-        </>
-      ) : (
-        <>
-          <Image
-            source={require("../assets/images/delivery-status.png")}
-            style={{
-              width: 80,
-              height: 80,
-              alignSelf: "center",
-              marginTop: 10,
-            }}
-          />
-          <SectionTitle>Ongoing</SectionTitle>
-          {deliveries
-            .filter((d) => d.ongoing)
-            .map((d) => (
-              <DeliveryCard
-                key={d.id}
-                onPress={() => router.push("/deliveryProgress")}
-              >
-                <DeliveryText>{d.school}</DeliveryText>
-                <StatusText>
-                  Status: {d.status} • {d.time}
-                </StatusText>
-              </DeliveryCard>
-            ))}
+        {loading ? (
+          <EmptyText>Loading deliveries...</EmptyText>
+        ) : !hasDeliveries ? (
+          <>
+            <EmptyText>There’s no delivery going on in the mean time.</EmptyText>
+            <DeliveryImage
+              source={require("../assets/images/delivery-status.png")}
+              resizeMode="contain"
+            />
+            <StartButton onPress={() => router.push("/deliveryStatus")}>
+              <StartText>MAKE DELIVERY</StartText>
+            </StartButton>
+          </>
+        ) : (
+          <>
+            {/* IMAGE */}
+            <Image
+              source={require("../assets/images/delivery-status.png")}
+              style={{
+                width: 80,
+                height: 80,
+                alignSelf: "center",
+                marginTop: 10,
+              }}
+            />
 
-          <SectionTitle>Completed</SectionTitle>
-          {deliveries
-            .filter((d) => !d.ongoing)
-            .map((d) => (
-              <DeliveryCard key={d.id}>
-                <DeliveryText>{d.school}</DeliveryText>
-                <StatusText>Delivered successfully</StatusText>
-              </DeliveryCard>
-            ))}
-        </>
-      )}
+            {/* ONGOING */}
+            <SectionTitle>Ongoing</SectionTitle>
+            {deliveries
+              .filter((d) => d.ongoing)
+              .map((d) => (
+                <DeliveryCard
+                  key={d.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/deliveryProgress",
+                      params: { deliveryId: d.id },
+                    })
+                  }
+                >
+                  <DeliveryText>{d.school}</DeliveryText>
+                  <StatusText>
+                    Status: {d.status} • {d.time}
+                  </StatusText>
+                </DeliveryCard>
+              ))}
+
+            {/* COMPLETED */}
+            <SectionTitle>Completed</SectionTitle>
+            {deliveries
+              .filter((d) => !d.ongoing)
+              .map((d) => (
+                <DeliveryCard key={d.id}>
+                  <DeliveryText>{d.school}</DeliveryText>
+                  <StatusText>Delivered successfully</StatusText>
+                </DeliveryCard>
+              ))}
+          </>
+        )}
       </ScrollArea>
 
       <BottomNav />
@@ -177,3 +217,4 @@ const DeliveryList = () => {
 };
 
 export default DeliveryList;
+
