@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const DEFAULT_LOCAL_BASE_URL =
   Platform.OS === "web"
     ? "http://localhost:8000"      
-    : "http://192.168.1.178:8000";   
+    : "https://s85vbld9-8000.asse.devtunnels.ms";   
 
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_LOCAL_BASE_URL;
@@ -37,7 +37,10 @@ export async function apiFetch(path: string, options: ApiOptions = {}) {
 
   let data: any = null;
   try {
-    data = await res.json();
+    const text = await res.text();
+    if (text) {
+      data = JSON.parse(text);
+    }
   } catch (e) {
     console.log("Gagal parse JSON dari", path, e);
   }
