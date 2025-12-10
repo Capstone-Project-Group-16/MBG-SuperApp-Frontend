@@ -1,30 +1,37 @@
-// ini kode buat ngecek progress PER delivery-nya
-
 import BottomNav from "@/components/bottomNavigation";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components/native";
 
-type StatusItem = {
-  text: string;
-  time: string;
-  active?: boolean;
+import {
+  pickupFromCatering,
+  pickupFromSchool,
+} from "../lib/api.js";
+
+type DeliveryStatus =
+  | "ON_DELIVERY"
+  | "ARRIVED_AT_SCHOOL"
+  | "RETURNING_TO_CATERING"
+  | "RETURNED_TO_CATERING";
+
+type ProgressItem = {
+  label: string;
+  time?: string | null;
+  status: DeliveryStatus;
+  isActive: boolean;
+  isDone: boolean;
+  isScan?: boolean;
 };
+
+const Wrapper = styled.View`
+  flex: 1;
+  background-color: white;
+`;
 
 const Container = styled.ScrollView`
   flex: 1;
   background-color: white;
   padding: 20px;
-`;
-
-const ScrollArea = styled.ScrollView`
-  flex: 1;
-`;
-
-const Wrapper = styled.View`
-  flex: 1;
-  background-color: white;
-  position: relative;
 `;
 
 const HeaderText = styled.Text`
@@ -42,33 +49,25 @@ const DeliveryCard = styled.View`
   border-radius: 16px;
   padding: 16px;
   margin-top: 20px;
+  justify-content: space-between;
+`;
+
+const DeliveryRow = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
 `;
 
-const DeliveryInfo = styled.View`
-  flex: 1;
-`;
-
-const SchoolName = styled.Text`
-  font-family: "Fredoka-Regular";
-  font-size: 18px;
-  font-weight: 700;
-  color: #214626;
-`;
-
-const DeliveryText = styled.Text`
+const DeliveryLabel = styled.Text`
   font-family: "Jost";
   font-size: 14px;
-  color: #333;
-  margin-top: 3px;
+  color: #666;
 `;
 
-const DeliveryImage = styled.Image`
-  width: 55px;
-  height: 55px;
-  margin-left: 10px;
+const DeliveryValue = styled.Text`
+  font-family: "Jost";
+  font-size: 16px;
+  font-weight: 600;
+  color: #214626;
 `;
 
 const StatusContainer = styled.View`
@@ -79,60 +78,57 @@ const StatusTitle = styled.Text`
   font-family: "Fredoka-Regular";
   font-size: 18px;
   font-weight: 700;
-  color: black;
   text-align: center;
   margin-bottom: 14px;
 `;
 
-const StatusList = styled.View`
-  background-color: #f8ffed;
-  border: 2px solid rgba(69, 162, 70, 0.5);
-  border-radius: 20px;
-  padding: 15px;
+const ProgressWrapper = styled.View`
+  padding-left: 10px;
+  margin-top: 10px;
 `;
 
-const StatusItemRow = styled.View`
+const Row = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 22px;
 `;
 
-/* Tipe untuk styled props: active */
-const StatusIconWrapper = styled.View`
-  width: 28px;
-  align-items: center;
-  position: relative;
+const Circle = styled.View<{ active: boolean; done: boolean }>`
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background-color: ${(props: { active: boolean; done: boolean }) =>
+    props.done ? "#1F8815" : props.active ? "#214626" : "#A7B0A6"};
+  margin-right: 14px;
 `;
 
-/* line between circles - absolute positioned (rendered only when needed) */
-const StatusLine = styled.View`
-  width: 2px;
-  height: 42px;
-  background-color: #b7d4b2;
+const Line = styled.View`
   position: absolute;
-  top: 16px;
+  width: 2px;
+  height: 30px;
+  background-color: #b7d4b2;
+  left: 7px;
+  top: 18px;
 `;
 
-const StatusCircle = styled.View<{ active?: boolean }>`
-  width: 12px;
-  height: 12px;
-  border-radius: 6px;
-  background-color: ${(p: { active?: boolean }) =>
-    p.active ? "#214626" : "#b7d4b2"};
-`;
-
-const StatusTextStyled = styled.Text`
+const Label = styled.Text<{ done?: boolean }>`
   font-family: "Jost";
   font-size: 15px;
-  color: #222;
+  color: ${(props: { done?: boolean }) => (props.done ? "#1F8815" : "#111")};
   flex: 1;
-  margin-left: 12px;
 `;
 
-const StatusTime = styled.Text`
+const TimeText = styled.Text`
+  font-family: "Jost";
+  font-size: 13px;
+  color: #444;
+`;
+
+const ScanText = styled.Text`
+  color: #214626;
   font-family: "Jost";
   font-size: 14px;
-  color: #444;
+  text-decoration: underline;
 `;
 
 const DoneButton = styled.TouchableOpacity`
@@ -151,78 +147,152 @@ const DoneText = styled.Text`
   font-weight: 700;
 `;
 
-const DeliveryProgress: React.FC = () => {
+export default function DeliveryProgress() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  // ambil param jika dikirim, fallback ke dummy
-  const schoolName = (params?.schoolName as string) || "SMAN 1 DEPOK";
-  const eta = (params?.eta as string) || "12:00 PM";
+  const plateDistributionId = params.plateDistributionId as string;
+  const plateCode = params.plateCode as string;
+  const initialStatus = params.status as DeliveryStatus;
 
-  // kalau dikirim sebagai JSON string via params, parse; kalau nggak, fallback ke array contoh
-  const parsedStatus =
-    typeof params?.currentStatus === "string"
-      ? (JSON.parse(params.currentStatus as string) as StatusItem[])
-      : undefined;
+  const [schoolName, setSchoolName] = useState(params.schoolName || "");
+  const [studentName, setStudentName] = useState(params.studentName || "");
+  const [status, setStatus] = useState<DeliveryStatus>(initialStatus);
+  const [progress, setProgress] = useState<ProgressItem[]>([]);
 
-  const currentStatus: StatusItem[] =
-    parsedStatus ??
-    [
-      { text: "Catering checking order list", time: "06:00 AM", active: true },
-      { text: "Catering buy raw ingredients", time: "06:30 AM", active: true },
-      { text: "Food being cooked", time: "07:30 AM", active: true },
-      { text: "Food ready", time: "10:00 AM", active: false },
-      { text: "Food being delivered", time: "10:30 AM", active: false },
-      { text: "Food has been arrived", time: "12:00 PM", active: false },
+  useEffect(() => {
+    buildProgress(initialStatus);
+  }, []);
+
+  const buildProgress = (current: DeliveryStatus) => {
+    const nowTime = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const list: ProgressItem[] = [
+      {
+        label: "Food ready and delivery start",
+        status: "ON_DELIVERY",
+        time: current === "ON_DELIVERY" ? nowTime : null,
+        isActive: current === "ON_DELIVERY",
+        isDone:
+          current === "ARRIVED_AT_SCHOOL" ||
+          current === "RETURNING_TO_CATERING" ||
+          current === "RETURNED_TO_CATERING",
+      },
+      {
+        label: "Food delivered to student",
+        status: "ARRIVED_AT_SCHOOL",
+        time: current === "ARRIVED_AT_SCHOOL" ? nowTime : null,
+        isActive: current === "ARRIVED_AT_SCHOOL",
+        isDone:
+          current === "RETURNING_TO_CATERING" ||
+          current === "RETURNED_TO_CATERING",
+      },
+      {
+        label: "Plate returned",
+        status: "RETURNING_TO_CATERING",
+        time: current === "RETURNING_TO_CATERING" ? nowTime : null,
+        isScan: true,
+        isActive: current === "RETURNING_TO_CATERING",
+        isDone: current === "RETURNED_TO_CATERING",
+      },
+      {
+        label: "Delivery completed",
+        status: "RETURNED_TO_CATERING",
+        time: current === "RETURNED_TO_CATERING" ? nowTime : null,
+        isActive: current === "RETURNED_TO_CATERING",
+        isDone: current === "RETURNED_TO_CATERING",
+      },
     ];
+
+    setProgress(list);
+  };
+
+  // === HANDLERS FOR UPDATE STATUS ===
+  const handlePickupFromCatering = async () => {
+    try {
+      await pickupFromCatering(plateCode);
+      setStatus("ON_DELIVERY");
+      buildProgress("ON_DELIVERY");
+    } catch (e) {
+      console.log("Error updating ON_DELIVERY:", e);
+    }
+  };
+
+  const handlePickupFromSchool = async () => {
+    try {
+      await pickupFromSchool(plateCode);
+      setStatus("RETURNING_TO_CATERING");
+      buildProgress("RETURNING_TO_CATERING");
+    } catch (e) {
+      console.log("Error updating RETURNING_TO_CATERING:", e);
+    }
+  };
 
   return (
     <Wrapper>
-    <Container>
-      <ScrollArea showsVerticalScrollIndicator={false}>
-      <HeaderText>Delivery Progress</HeaderText>
+      <Container>
+        <HeaderText>Delivery Progress</HeaderText>
 
-      <DeliveryCard>
-        <DeliveryInfo>
-          <SchoolName>{schoolName}</SchoolName>
-          <DeliveryText>Food is on the way!</DeliveryText>
-          <DeliveryText>ETA: {eta}</DeliveryText>
-        </DeliveryInfo>
-        <DeliveryImage
-          source={require("../assets/images/delivery-truck.png")}
-          resizeMode="contain"
-        />
-      </DeliveryCard>
+        {/* Information Card */}
+        <DeliveryCard>
+          <DeliveryRow>
+            <DeliveryLabel>School:</DeliveryLabel>
+            <DeliveryValue>{schoolName}</DeliveryValue>
+          </DeliveryRow>
 
-      <StatusContainer>
-        <StatusTitle>Current Status</StatusTitle>
+          <DeliveryRow style={{ marginTop: 5 }}>
+            <DeliveryLabel>Student:</DeliveryLabel>
+            <DeliveryValue>{studentName}</DeliveryValue>
+          </DeliveryRow>
 
-        <StatusList>
-          {currentStatus.map((item: StatusItem, index: number) => (
-            <StatusItemRow key={index}>
-              <StatusIconWrapper>
-                {/* circle */}
-                <StatusCircle active={!!item.active} />
-                {/* render connector line if not last */}
-                {index !== currentStatus.length - 1 && <StatusLine />}
-              </StatusIconWrapper>
+          <DeliveryRow style={{ marginTop: 5 }}>
+            <DeliveryLabel>Plate Code:</DeliveryLabel>
+            <DeliveryValue>{plateCode}</DeliveryValue>
+          </DeliveryRow>
+        </DeliveryCard>
 
-              <StatusTextStyled>{item.text}</StatusTextStyled>
-              <StatusTime>{item.time}</StatusTime>
-            </StatusItemRow>
-          ))}
-        </StatusList>
-      </StatusContainer>
+        {/* Progress Section */}
+        <StatusContainer>
+          <StatusTitle>Current Status</StatusTitle>
+          <ProgressWrapper>
+            {progress.map((p, index) => (
+              <Row key={index}>
+                <Circle active={p.isActive} done={p.isDone} />
+                {index !== progress.length - 1 && <Line />}
 
-      <DoneButton onPress={() => router.push("/deliveryList")}>
-        <DoneText>CHECK OTHER DELIVERY</DoneText>
-      </DoneButton>
-      </ScrollArea>
+                {p.isScan ? (
+                  <Label>
+                    Plate returned.{" "}
+                    <ScanText
+                      onPress={() =>
+                        router.push({
+                          pathname: "/plateScan",
+                          params: { plateCode },
+                        })
+                      }
+                    >
+                      SCAN HERE
+                    </ScanText>
+                  </Label>
+                ) : (
+                  <Label done={p.isDone}>{p.label}</Label>
+                )}
 
-    </Container>
-        <BottomNav />
+                <TimeText>{p.time || "--:--"}</TimeText>
+              </Row>
+            ))}
+          </ProgressWrapper>
+        </StatusContainer>
+
+        <DoneButton onPress={() => router.push("/deliveryList")}>
+          <DoneText>CHECK OTHER DELIVERY</DoneText>
+        </DoneButton>
+      </Container>
+
+      <BottomNav />
     </Wrapper>
   );
-};
-
-export default DeliveryProgress;
+}
