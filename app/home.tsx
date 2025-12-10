@@ -257,6 +257,10 @@ const Home: React.FC = () => {
         <MenuItem onPress={() => navigateAndClose('/deliveryList')}>
           <MenuItemText>Delivery Progress</MenuItemText>
         </MenuItem>
+
+        <MenuItem onPress={() => navigateAndClose('/createMenu')}>
+          <MenuItemText>MBG Menu List</MenuItemText>
+        </MenuItem>
       </MenuPanel>
 
       <ScrollArea showsVerticalScrollIndicator={false}>

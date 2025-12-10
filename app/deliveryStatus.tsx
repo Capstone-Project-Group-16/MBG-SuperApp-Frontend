@@ -220,7 +220,7 @@ export default function DeliveryStatus() {
       if (!cateringIdStr) throw new Error("cateringId not found in storage");
       const cateringId = Number(cateringIdStr);
 
-      // we currently only have createDeliverySchedule(cateringId, pickUpDate, pickUpTime)
+      // currently only have createDeliverySchedule(cateringId, pickUpDate, pickUpTime)
       const pickUpDate = formatDate(deliveryDate);
       const pickUpTime = formatTime(time);
 
@@ -228,7 +228,7 @@ export default function DeliveryStatus() {
 
       console.log("createDeliverySchedule response:", resp);
 
-      // navigate to deliveryProgress (you might want to pass deliveryId if resp returns it)
+      // navigate to deliveryProgress
       router.push("/deliveryProgress");
     } catch (err) {
       console.error("Error creating delivery:", err);
