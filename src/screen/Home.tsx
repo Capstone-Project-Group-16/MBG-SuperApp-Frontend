@@ -1,16 +1,18 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native"
+import React, { useCallback, useEffect, useState } from "react"
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { useFocusEffect } from "@react-navigation/native"
 import type { RootStackParamList } from "../../App"
 import { colors } from "../theme/Color"
 import StatusBar from "../components/StatusBar"
 import FeatureCard from "../components/FeatureCard"
 import NavBar from "../components/NavBar"
 import { apiFetch } from "../lib/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">
 
@@ -21,7 +23,10 @@ export default function HomeScreen({ navigation, route }: Props) {
   const [exp, setExp] = useState<string>("0")
   const [gems, setGems] = useState<string>("0")
 
-  useEffect(() => {
+  const [lastOrderId, setLastOrderId] = useState<number | null>(null);
+
+  useFocusEffect(
+  useCallback(() => {
     const loadProfile = async () => {
       if (!studentProfileId) {
         console.warn("studentProfileId tidak ada di route params")
@@ -52,7 +57,23 @@ export default function HomeScreen({ navigation, route }: Props) {
 
     loadProfile()
   }, [studentProfileId])
+  )
   
+  useEffect(() => {
+    const loadLastOrderId = async () => {
+      try {
+        const stored = await AsyncStorage.getItem("lastOrderId");
+        if (stored) {
+          setLastOrderId(Number(stored));
+        }
+      } catch (err) {
+        console.warn("Failed to load lastOrderId", err);
+      }
+    };
+
+    loadLastOrderId();
+  }, []);
+
   return (
     <SafeAreaView style={styles.root}>
       <View style={styles.header}>
@@ -95,7 +116,28 @@ export default function HomeScreen({ navigation, route }: Props) {
           title="MBG Quiz"
           description="Siap-siap! Quiz ini bakal bikin kamu cerdas pilih makanan."
           icon={require("../../assets/icon/mbg-quiz.png")}
-          onPress={() => navigation.navigate("MBGQuiz")}
+          onPress={() => {
+            if (!lastOrderId) {
+              Alert.alert(
+                "MBGQuiz",
+                "Kamu belum punya riwayat order. Lakukan pemesanan makanan dulu sebelum ikut MBGQuiz ya! 😊"
+              );
+              return;
+            }
+
+            if (!studentProfileId) {
+              Alert.alert(
+                "MBGQuiz",
+                "Profil siswa tidak ditemukan. Coba login ulang."
+              );
+              return;
+            }
+
+            navigation.navigate("MBGQuiz", { 
+              orderId: lastOrderId, 
+              studentProfileId 
+            });
+          }}
         />
         <View style={{ height: hp("10%") }} />
       </ScrollView>

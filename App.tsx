@@ -33,7 +33,7 @@ export type RootStackParamList = {
   FoodScanner: { scanMode?: "distribution" | "waste" }
   NutritionFacts: undefined
   FoodWaste: undefined
-  MBGQuiz: undefined
+  MBGQuiz: { orderId: number ; studentProfileId: number }
   QuizResult: { score: number; correct: number; incorrect: number; xp: number; gems: number }
   DistributionTracker: { studentProfileId: number }
   SpinWheel: { studentProfileId: number }

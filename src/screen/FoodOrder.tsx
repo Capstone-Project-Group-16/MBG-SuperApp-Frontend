@@ -17,6 +17,7 @@ import { colors } from "../theme/Color"
 import StatusBar from "../components/StatusBar"
 import Button from "../components/Button"
 import { apiFetch } from "../lib/api"
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "FoodOrder">
 
@@ -67,6 +68,19 @@ export default function FoodOrder({ navigation, route }: Props) {
         Alert.alert("Order gagal", data?.detail || "Terjadi kesalahan saat memproses pesanan");
     } else {
         console.log("Order berhasil:", data);
+        const orderId =
+        data.orderId ?? data.foodDemandId ?? data.id ?? null; // SESUAIKAN dengan field sebenarnya
+
+      if (orderId) {
+        try {
+          await AsyncStorage.setItem("lastOrderId", String(orderId));
+          console.log("lastOrderId disimpan:", orderId);
+        } catch (err) {
+          console.warn("Gagal menyimpan lastOrderId ke AsyncStorage:", err);
+        }
+      } else {
+        console.warn("orderId tidak ditemukan di response order:", data);
+      }
         Alert.alert("Order berhasil", "Kamu berhasil memesan paket MBG hari ini!");
 
         // Langsung reset ke Home setelah order sukses
