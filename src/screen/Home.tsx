@@ -102,7 +102,7 @@ export default function HomeScreen({ navigation, route }: Props) {
           title="Nutrition Facts"
           description="Cek kekuatan nutrisi yang ada di balik makananmu!"
           icon={require("../../assets/icon/nutrition-facts.png")}
-          onPress={() => navigation.navigate("NutritionFacts")}
+          onPress={() => navigation.navigate("NutritionFacts", { studentProfileId: studentProfileId })}
         />
         <View style={{ height: hp("3%") }} />
         <FeatureCard
