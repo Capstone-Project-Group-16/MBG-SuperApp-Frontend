@@ -31,9 +31,9 @@ export type RootStackParamList = {
     tray: any              
     foodImageLink?: string | null  
   }
-  FoodScanner: { scanMode?: "distribution" | "waste" }
+  FoodScanner: { studentProfileId: number; orderId?: number; phase?: "before" | "after"; scanMode?: string }
   NutritionFacts: { studentProfileId: number }
-  FoodWaste: undefined
+  FoodWaste: { studentProfileId: any; orderId: number; wastePercentage: any; beforeArea: any; afterArea: any }
   MBGQuiz: { orderId: number ; studentProfileId: number }
   QuizResult: { score: number; correct: number; incorrect: number; xp: number; gems: number }
   DistributionTracker: { studentProfileId: number }

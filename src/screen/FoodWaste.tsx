@@ -170,6 +170,6 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     circleContainer: { alignItems: "center", marginBottom: hp("3%"), gap: hp("1.5%") },
-    wasteSubtext: { fontSize: RFValue(14), color: colors.textGray, fontFamily: "Jost" },
+    wasteSubtext: { fontSize: RFValue(14), color: colors.brandGrey, fontFamily: "Jost" },
     sectionTitle: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(20), color: colors.textBlack, marginLeft: hp("1.5%") },
 })
