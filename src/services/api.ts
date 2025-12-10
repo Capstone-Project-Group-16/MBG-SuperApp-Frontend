@@ -11,6 +11,9 @@ export const API_ENDPOINTS = {
     MOST_ORDERED: "/mbg-food-customizer/food-demand/most-ordered",
     AVERAGE_NUTRITION: "/mbg-food-customizer/food-demand/average-nutrition",
   },
+  LEADERBOARD: {
+    GET: "/account/student-profile/leaderboard",
+  },
 };
 
 // Helper function to make API requests

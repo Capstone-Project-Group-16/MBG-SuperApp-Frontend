@@ -12,6 +12,7 @@ import Statistic from './pages/Statistic';
 import Tracker from './pages/Tracker';
 import FavoriteFood from './pages/FavoriteFood';
 import AverageNutrition from './pages/AverageNutrition';
+import Leaderboard from './pages/Leaderboard';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/statistic" element={<ProtectedRoute requiredRoles={["Government"]}><Statistic /></ProtectedRoute>} />
           <Route path="/favorite-food" element={<ProtectedRoute requiredRoles={["Government"]}><FavoriteFood /></ProtectedRoute>} />
           <Route path="/average-nutrition" element={<ProtectedRoute requiredRoles={["Government"]}><AverageNutrition /></ProtectedRoute>} />
+          <Route path="/leaderboard" element={<ProtectedRoute requiredRoles={["Government"]}><Leaderboard /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

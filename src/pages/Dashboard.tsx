@@ -48,6 +48,22 @@ interface AverageNutritionResponse {
   dataBySchool: any[] | null;
 }
 
+interface LeaderboardEntry {
+  rank: number;
+  studentProfileId: number;
+  userId: number;
+  userFullName: string;
+  userProfilePictureLink: string | null;
+  schoolId: number;
+  schoolName: string;
+  expPoints: number;
+}
+
+interface LeaderboardResponse {
+  leaderboard: LeaderboardEntry[];
+  total: number;
+}
+
 const PageWrapper = styled.div`
   width: 100vw;
   height: 100vh;
@@ -151,10 +167,14 @@ const DistributionItem = styled.div`
 
 const TopRow = styled.div`
   display: flex;
-  justify-content: center; 
+  justify-content: space-between;
   width: 100%;
   gap: 25px;
   margin-top: 25px;
+  margin-left: -40px;
+  margin-right: -40px;
+  padding-left: 40px;
+  padding-right: 40px;
 `;
 
 const TableHeader = styled.div`
@@ -176,7 +196,7 @@ const TableHeader = styled.div`
 
 // average nutrition ---
 const NutritionCard = styled.div`
-  width: 32%;
+  width: calc((100% - 25px) / 2);
   background: white;
   border-radius: 30px;
   border: 2px solid rgba(69, 162, 70, 0.5);
@@ -216,7 +236,7 @@ const BarFill = styled.div<{ width: string; color: string }>`
 
 // favorite menu ---
 const FavoriteMenuLarge = styled.div`
-  width: 32%;
+  width: calc((100% - 25px) / 2);
   background: white;
   border-radius: 30px;
   border: 2px solid rgba(69, 162, 70, 0.5);
@@ -327,11 +347,93 @@ const SmallStatCard = styled.div`
   color: black;
 `;
 
+const LeaderboardSection = styled.div`
+  width: calc((100% - 25px) / 2);
+  background: white;
+  border-radius: 30px;
+  border: 2px solid rgba(69, 162, 70, 0.5);
+  padding: 20px 25px;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height: 600px;
+  overflow-y: auto;
+`;
+
+const LeaderboardTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+
+  tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+
+    &:hover {
+      background: #f9f9f9;
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  td {
+    padding: 12px 8px;
+    font-size: 14px;
+    color: black;
+  }
+`;
+
+const LeaderboardRank = styled.td`
+  font-weight: 700;
+  font-size: 16px;
+  color: #45a246;
+  width: 40px;
+`;
+
+const LeaderboardName = styled.td`
+  font-weight: 600;
+  color: #214626;
+  flex: 1;
+`;
+
+const LeaderboardSchool = styled.td`
+  font-size: 13px;
+  color: #999;
+  width: 150px;
+`;
+
+const LeaderboardPoints = styled.td`
+  font-weight: 700;
+  color: #45a246;
+  text-align: right;
+  width: 100px;
+`;
+
+const ViewMoreLink = styled(Link)`
+  align-self: center;
+  margin-top: 15px;
+  padding: 8px 16px;
+  background: #45a246;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #388642;
+  }
+`;
+
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mostOrderedFood, setMostOrderedFood] = useState<MostOrderedFood[]>([]);
   const [nutrition, setNutrition] = useState<Nutrition | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -343,8 +445,9 @@ export default function Dashboard() {
         
         const foodEndpoint = `${API_ENDPOINTS.FOOD_DEMAND.MOST_ORDERED}?order_date=${orderDate}&filter_type=all`;
         const nutritionEndpoint = `${API_ENDPOINTS.FOOD_DEMAND.AVERAGE_NUTRITION}?order_date=${orderDate}&filter_type=all`;
+        const leaderboardEndpoint = `${API_ENDPOINTS.LEADERBOARD.GET}?filter_type=all`;
         
-        const [foodData, nutritionData] = await Promise.all([
+        const [foodData, nutritionData, leaderboardData] = await Promise.all([
           apiRequest<MostOrderedFoodResponse>(foodEndpoint, {
             method: "GET",
             token: token || undefined,
@@ -353,15 +456,21 @@ export default function Dashboard() {
             method: "GET",
             token: token || undefined,
           }),
+          apiRequest<LeaderboardResponse>(leaderboardEndpoint, {
+            method: "GET",
+            token: token || undefined,
+          }),
         ]);
         
         // Limit to 10 items
         setMostOrderedFood(foodData.mostOrderedFood.slice(0, 10));
         setNutrition(nutritionData.data);
+        setLeaderboard(leaderboardData.leaderboard.slice(0, 10));
       } catch (error) {
         console.error("Failed to fetch data:", error);
         setMostOrderedFood([]);
         setNutrition(null);
+        setLeaderboard([]);
       } finally {
         setIsLoading(false);
       }
@@ -484,6 +593,37 @@ export default function Dashboard() {
               )}
             </NutritionCard>
           </TopRow>
+
+          {/* LEADERBOARD SECTION */}
+          <LeaderboardSection style={{ marginTop: "35px" }}>
+            <TableHeader>Top 10 Student Leaderboard</TableHeader>
+
+            {isLoading ? (
+              <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                Loading...
+              </div>
+            ) : leaderboard.length > 0 ? (
+              <>
+                <LeaderboardTable>
+                  <tbody>
+                    {leaderboard.map((entry) => (
+                      <tr key={entry.studentProfileId}>
+                        <LeaderboardRank>{entry.rank}</LeaderboardRank>
+                        <LeaderboardName>{entry.userFullName}</LeaderboardName>
+                        <LeaderboardSchool>{entry.schoolName}</LeaderboardSchool>
+                        <LeaderboardPoints>{entry.expPoints.toLocaleString()}</LeaderboardPoints>
+                      </tr>
+                    ))}
+                  </tbody>
+                </LeaderboardTable>
+                <ViewMoreLink to="/leaderboard">View Full Leaderboard →</ViewMoreLink>
+              </>
+            ) : (
+              <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                No leaderboard data available
+              </div>
+            )}
+          </LeaderboardSection>
 
           <SectionRow></SectionRow>
 

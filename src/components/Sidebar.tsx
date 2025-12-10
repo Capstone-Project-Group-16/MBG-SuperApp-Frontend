@@ -49,6 +49,7 @@ export default function Sidebar({ open, setOpen: _setOpen }: SidebarProps) {
       <SidebarItem onClick={() => navigate("/dashboard")}>Dashboard</SidebarItem>
       <SidebarItem onClick={() => navigate("/favorite-food")}>Favorite Food</SidebarItem>
       <SidebarItem onClick={() => navigate("/average-nutrition")}>Average Nutrition</SidebarItem>
+      <SidebarItem onClick={() => navigate("/leaderboard")}>Student Leaderboard</SidebarItem>
       <SidebarItem onClick={() => navigate("/tracker")}>Distribution Tracker</SidebarItem>
       <SidebarItem onClick={() => navigate("/statistic")}>Distribution Statistic</SidebarItem>
       <SidebarItem onClick={handleLogout}>Log Out</SidebarItem>
