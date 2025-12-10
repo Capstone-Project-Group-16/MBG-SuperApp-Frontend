@@ -54,7 +54,6 @@ type OrderDetails = {
 
 export default function NutritionFacts({ navigation, route }: Props) {
   const studentProfileId = route?.params?.studentProfileId;
-
   const [exp, setExp] = useState<string>("0");
   const [gems, setGems] = useState<string>("0");
   const [nutrition, setNutrition] = useState<NutritionData | null>(null);

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useCallback, useEffect, useState } from "react"
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from "react-native"
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert, TouchableOpacity, Image, ActivityIndicator } from "react-native"
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen"
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
@@ -16,49 +16,56 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">
 
+interface User {
+  userFullName: string
+  userProfilePictureLink?: string | null
+}
+
+interface StudentProfile {
+  studentProfileId: number
+  user: User
+  expPoints: number
+  mbgPoints: number
+}
+
 export default function HomeScreen({ navigation, route }: Props) {
   const studentProfileId = route?.params?.studentProfileId
-  const [userName, setUserName] = useState<string>("Loading...")
+  const [profile, setProfile] = useState<StudentProfile | null>(null)
   const [avatarLetter, setAvatarLetter] = useState<string>("?")
-  const [exp, setExp] = useState<string>("0")
-  const [gems, setGems] = useState<string>("0")
-
   const [lastOrderId, setLastOrderId] = useState<number | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true)
 
   useFocusEffect(
-  useCallback(() => {
-    const loadProfile = async () => {
-      if (!studentProfileId) {
-        console.warn("studentProfileId tidak ada di route params")
-        return
-      }
-
-      try {
-        const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
-          method: "GET",
-        })
-
-        if (!res.ok) {
-          console.log("Gagal fetch student profile:", data)
+    useCallback(() => {
+      const loadProfile = async () => {
+        if (!studentProfileId) {
+          console.warn("studentProfileId tidak ada di route params")
           return
         }
 
-        const fullName: string = data?.user?.userFullName || "Student"
-        const firstLetter = fullName.charAt(0).toUpperCase()
+        try {
+          const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
+            method: "GET",
+          })
 
-        setUserName(fullName)
-        setAvatarLetter(firstLetter)
-        setExp(String(data?.expPoints ?? "0"))
-        setGems(String(data?.mbgPoints ?? "0")) 
-      } catch (err) {
-        console.log("Error fetch student profile:", err)
+          if (!res.ok || !data) {
+            console.warn("Failed to fetch student profile", data)
+            return
+          }
+
+          setProfile(data)
+          setAvatarLetter(data.user.userFullName.charAt(0).toUpperCase())
+        } catch (err) {
+          console.log("Error loading profile:", err);
+        } finally {
+          setProfileLoading(false);
+        }
       }
-    }
 
-    loadProfile()
-  }, [studentProfileId])
+      loadProfile()
+    }, [studentProfileId])
   )
-  
+
   useEffect(() => {
     const loadLastOrderId = async () => {
       try {
@@ -70,7 +77,7 @@ export default function HomeScreen({ navigation, route }: Props) {
           const { res, data } = await apiFetch(`/api/account/student-profile/get/${studentProfileId}`, {
             method: "GET",
           });
-          
+
           if (res.ok && data?.orders && data.orders.length > 0) {
             // Get the most recent order
             const latestOrder = data.orders[0];
@@ -92,15 +99,27 @@ export default function HomeScreen({ navigation, route }: Props) {
   return (
     <SafeAreaView style={styles.root}>
       <View style={styles.header}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarLetter}>{avatarLetter}</Text>
-        </View>
-        <Text style={styles.userName}>{userName}</Text>
+        { /* Profile Picture */}
+        <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate("Profile", { studentProfileId })}>
+          {profileLoading ? (
+            <ActivityIndicator size="small" color={colors.brandGreen} />
+          ) : profile?.user.userProfilePictureLink ? (
+            <Image source={{ uri: profile.user.userProfilePictureLink }} style={styles.avatarImage} />
+          ) : (
+            <Text style={styles.avatarLetter}>{avatarLetter}</Text>
+          )}
+        </TouchableOpacity>
+
+        { /* Username */}
+        <Text style={styles.userName}>
+          {profileLoading ? "Loading..." : profile?.user.userFullName ? profile.user.userFullName.split(" ")[0] : "Student"}
+        </Text>
+
         <View style={{ flex: 1 }} />
         <StatusBar
           items={[
-            { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: exp, textColor: colors.textGold },
-            { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: gems, textColor: colors.textBlue },
+            { label: "Exp", icon: require("../../assets/icon/thunder.png"), value: String(profile?.expPoints), textColor: colors.textGold },
+            { label: "Gems", icon: require("../../assets/icon/diamond.png"), value: String(profile?.mbgPoints), textColor: colors.textBlue },
           ]}
         />
       </View>
@@ -132,14 +151,14 @@ export default function HomeScreen({ navigation, route }: Props) {
               );
               return;
             }
-            
+
             // First, check if waste percentage already exists
             try {
               const { res, data } = await apiFetch(
                 `/api/mbg-food-waste-tracker/food-calculation/waste-percentage/${lastOrderId}`,
                 { method: "GET" }
               );
-              
+
               if (res.ok && data && data.wastePercentage !== undefined) {
                 // Data exists, go directly to FoodWaste screen
                 navigation.navigate("FoodWaste", {
@@ -154,7 +173,7 @@ export default function HomeScreen({ navigation, route }: Props) {
             } catch (err) {
               console.log("No existing waste data, continuing to scanner");
             }
-            
+
             // Check for saved waste tracking state (before or after)
             let phase = "before";
             try {
@@ -166,7 +185,7 @@ export default function HomeScreen({ navigation, route }: Props) {
             } catch (err) {
               console.warn("Failed to load saved state:", err);
             }
-            
+
             navigation.navigate("FoodScanner", { studentProfileId, orderId: lastOrderId, scanMode: "waste", phase })
           }}
         />
@@ -192,9 +211,9 @@ export default function HomeScreen({ navigation, route }: Props) {
               return;
             }
 
-            navigation.navigate("MBGQuiz", { 
-              orderId: lastOrderId, 
-              studentProfileId 
+            navigation.navigate("MBGQuiz", {
+              orderId: lastOrderId,
+              studentProfileId
             });
           }}
         />
@@ -203,7 +222,7 @@ export default function HomeScreen({ navigation, route }: Props) {
 
       <NavBar
         items={[
-          { label: "Home", icon: require("../../assets/icon/home.png"), active: true, onPress: () => {} },
+          { label: "Home", icon: require("../../assets/icon/home.png"), active: true, onPress: () => { } },
           { label: "Distribution Tracker", icon: require("../../assets/icon/distribution.png"), onPress: () => navigation.navigate("DistributionTracker", { studentProfileId }) },
           { label: "Spin Wheel", icon: require("../../assets/icon/spin-wheel.png"), onPress: () => navigation.navigate("SpinWheel", { studentProfileId }), },
           { label: "Leaderboard", icon: require("../../assets/icon/leaderboard.png"), onPress: () => navigation.navigate("Leaderboard", { studentProfileId }), },
@@ -237,4 +256,5 @@ const styles = StyleSheet.create({
   avatarLetter: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(16), color: colors.brandGreen },
   userName: { fontFamily: "Fredoka-SemiBold", fontSize: RFValue(18), color: colors.textBlack, letterSpacing: 0.5 },
   content: { paddingHorizontal: wp("4%"), paddingTop: hp("1.25%") },
+  avatarImage: { width: "100%", height: "100%", borderRadius: wp("5%") },
 })

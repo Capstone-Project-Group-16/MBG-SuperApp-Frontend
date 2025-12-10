@@ -15,6 +15,7 @@ import QuizResult from "./src/screen/QuizResult";
 import DistributionTracker from "./src/screen/DistributionTracker";
 import SpinWheel from "./src/screen/SpinWheel";
 import Leaderboard from "./src/screen/Leaderboard";
+import Profile from "./src/screen/Profile";
 import "react-native-gesture-handler";
 
 export type RootStackParamList = {
@@ -38,6 +39,7 @@ export type RootStackParamList = {
   DistributionTracker: { studentProfileId: number }
   SpinWheel: { studentProfileId: number }
   Leaderboard: { studentProfileId: number }
+  Profile: { studentProfileId: number }
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -91,6 +93,7 @@ export default function App() {
         <Stack.Screen name="DistributionTracker" component={DistributionTracker} />
         <Stack.Screen name="SpinWheel" component={SpinWheel} />
         <Stack.Screen name="Leaderboard" component={Leaderboard} />
+        <Stack.Screen name="Profile" component={Profile} />
       </Stack.Navigator>
     </NavigationContainer>
   )
