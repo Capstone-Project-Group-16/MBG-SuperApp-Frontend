@@ -21,6 +21,42 @@ interface MostOrderedFoodResponse {
   filterType: string;
 }
 
+interface Nutrition {
+  calories: number;
+  protein: number;
+  fat: number;
+  carbohydrates: number;
+  fiber: number;
+  sodium: number;
+  potassium: number;
+  calcium: number;
+  iron: number;
+  vitaminA: number;
+  vitaminC: number;
+  vitaminD: number;
+  magnesium: number;
+  totalOrders: number;
+}
+
+interface ProvinceNutrition {
+  province: string;
+  averageNutrition: Nutrition | null;
+}
+
+interface SchoolNutrition {
+  schoolId: number;
+  schoolName: string;
+  averageNutrition: Nutrition | null;
+}
+
+interface AverageNutritionResponse {
+  orderDate: string;
+  filterType: string;
+  data: Nutrition | null;
+  dataByProvince: ProvinceNutrition[] | null;
+  dataBySchool: SchoolNutrition[] | null;
+}
+
 const PageWrapper = styled.div`
   width: 100vw;
   min-height: 100vh;
@@ -247,6 +283,61 @@ const PaginationInfo = styled.div`
   font-weight: 600;
 `;
 
+const NutritionSection = styled.div`
+  background: white;
+  border-radius: 20px;
+  border: 2px solid rgba(69, 162, 70, 0.5);
+  padding: 25px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+`;
+
+const NutritionHeader = styled.div`
+  background: #e5ffe6;
+  border: 1px solid #8aa18d;
+  border-radius: 20px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 700;
+  color: black;
+`;
+
+const NutritionGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+`;
+
+const NutritionCard = styled.div`
+  background: #f9fff9;
+  border: 1px solid #45a246;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const NutritionLabel = styled.div`
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  text-transform: capitalize;
+`;
+
+const NutritionValue = styled.div`
+  font-size: 18px;
+  font-weight: 700;
+  color: #214626;
+`;
+
+const NutritionUnit = styled.span`
+  font-size: 12px;
+  color: #888;
+  margin-left: 4px;
+`;
+
 const PROVINCES = [
   { value: "ACEH", label: "Aceh" },
   { value: "BALI", label: "Bali" },
@@ -276,6 +367,9 @@ export default function FavoriteFood() {
   const [isLoading, setIsLoading] = useState(false);
   const [dataDate, setDataDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [nutrition, setNutrition] = useState<Nutrition | null>(null);
+  const [nutritionByProvince, setNutritionByProvince] = useState<ProvinceNutrition[] | null>(null);
+  const [nutritionBySchool, setNutritionBySchool] = useState<SchoolNutrition[] | null>(null);
   const itemsPerPage = 10;
 
   // Get today's date in dd:mm:yyyy format
@@ -304,23 +398,51 @@ export default function FavoriteFood() {
     try {
       const token = getStoredToken();
       let endpoint = `${API_ENDPOINTS.FOOD_DEMAND.MOST_ORDERED}?order_date=${dataDate}&filter_type=${filterType}`;
+      let nutritionEndpoint = `${API_ENDPOINTS.FOOD_DEMAND.AVERAGE_NUTRITION}?order_date=${dataDate}&filter_type=${filterType}`;
 
       if (filterType === "province" && selectedProvince) {
         endpoint += `&province=${selectedProvince}`;
+        nutritionEndpoint += `&province=${selectedProvince}`;
       } else if (filterType === "school" && selectedSchool) {
         endpoint += `&school_id=${selectedSchool}`;
+        nutritionEndpoint += `&school_id=${selectedSchool}`;
       }
 
-      const data = await apiRequest<MostOrderedFoodResponse>(endpoint, {
-        method: "GET",
-        token: token || undefined,
-      });
+      // Fetch both most ordered food and nutrition data in parallel
+      const [foodData, nutritionData] = await Promise.all([
+        apiRequest<MostOrderedFoodResponse>(endpoint, {
+          method: "GET",
+          token: token || undefined,
+        }),
+        apiRequest<AverageNutritionResponse>(nutritionEndpoint, {
+          method: "GET",
+          token: token || undefined,
+        }),
+      ]);
 
-      setMostOrderedFood(data.mostOrderedFood.slice(0, 1000));
+      setMostOrderedFood(foodData.mostOrderedFood.slice(0, 1000));
       setCurrentPage(1);
+
+      // Set nutrition data based on filter type
+      if (filterType === "all") {
+        setNutrition(nutritionData.data);
+        setNutritionByProvince(null);
+        setNutritionBySchool(null);
+      } else if (filterType === "province") {
+        setNutrition(null);
+        setNutritionByProvince(nutritionData.dataByProvince);
+        setNutritionBySchool(null);
+      } else if (filterType === "school") {
+        setNutrition(null);
+        setNutritionByProvince(null);
+        setNutritionBySchool(nutritionData.dataBySchool);
+      }
     } catch (error) {
-      console.error("Failed to fetch most ordered food:", error);
+      console.error("Failed to fetch data:", error);
       setMostOrderedFood([]);
+      setNutrition(null);
+      setNutritionByProvince(null);
+      setNutritionBySchool(null);
     } finally {
       setIsLoading(false);
     }
@@ -353,6 +475,63 @@ export default function FavoriteFood() {
       return `School: ${schoolName}`;
     }
     return "Select filter criteria";
+  };
+
+  const renderNutritionSection = () => {
+    let nutritionData: Nutrition | null = null;
+    let nutritionTitle = "";
+
+    if (filterType === "all" && nutrition) {
+      nutritionData = nutrition;
+      nutritionTitle = "Average Nutrition (National)";
+    } else if (filterType === "province" && nutritionByProvince && selectedProvince) {
+      const provinceData = nutritionByProvince.find((p) => p.province === selectedProvince);
+      nutritionData = provinceData?.averageNutrition || null;
+      const provinceName = PROVINCES.find((p) => p.value === selectedProvince)?.label;
+      nutritionTitle = `Average Nutrition (${provinceName})`;
+    } else if (filterType === "school" && nutritionBySchool && selectedSchool) {
+      const schoolData = nutritionBySchool.find((s) => s.schoolId === parseInt(selectedSchool));
+      nutritionData = schoolData?.averageNutrition || null;
+      const schoolName = schools.find((s) => s.id === parseInt(selectedSchool))?.name;
+      nutritionTitle = `Average Nutrition (${schoolName})`;
+    }
+
+    if (!nutritionData) {
+      return null;
+    }
+
+    const nutritionItems = [
+      { label: "Calories", value: nutritionData.calories, unit: "kcal" },
+      { label: "Protein", value: nutritionData.protein, unit: "g" },
+      { label: "Fat", value: nutritionData.fat, unit: "g" },
+      { label: "Carbohydrates", value: nutritionData.carbohydrates, unit: "g" },
+      { label: "Fiber", value: nutritionData.fiber, unit: "g" },
+      { label: "Sodium", value: nutritionData.sodium, unit: "mg" },
+      { label: "Potassium", value: nutritionData.potassium, unit: "mg" },
+      { label: "Calcium", value: nutritionData.calcium, unit: "mg" },
+      { label: "Iron", value: nutritionData.iron, unit: "mg" },
+      { label: "Vitamin A", value: nutritionData.vitaminA, unit: "mcg" },
+      { label: "Vitamin C", value: nutritionData.vitaminC, unit: "mg" },
+      { label: "Vitamin D", value: nutritionData.vitaminD, unit: "mcg" },
+      { label: "Magnesium", value: nutritionData.magnesium, unit: "mg" },
+    ];
+
+    return (
+      <NutritionSection>
+        <NutritionHeader>{nutritionTitle}</NutritionHeader>
+        <NutritionGrid>
+          {nutritionItems.map((item) => (
+            <NutritionCard key={item.label}>
+              <NutritionLabel>{item.label}</NutritionLabel>
+              <NutritionValue>
+                {item.value.toFixed(2)}
+                <NutritionUnit>{item.unit}</NutritionUnit>
+              </NutritionValue>
+            </NutritionCard>
+          ))}
+        </NutritionGrid>
+      </NutritionSection>
+    );
   };
 
   return (
@@ -526,6 +705,8 @@ export default function FavoriteFood() {
               </EmptyContainer>
             )}
           </DataContainer>
+
+          {renderNutritionSection()}
         </MainContent>
       </ContentWrapper>
     </PageWrapper>

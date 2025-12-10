@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   },
   FOOD_DEMAND: {
     MOST_ORDERED: "/mbg-food-customizer/food-demand/most-ordered",
+    AVERAGE_NUTRITION: "/mbg-food-customizer/food-demand/average-nutrition",
   },
 };
 

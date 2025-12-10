@@ -23,6 +23,31 @@ interface MostOrderedFoodResponse {
   filterType: string;
 }
 
+interface Nutrition {
+  calories: number;
+  protein: number;
+  fat: number;
+  carbohydrates: number;
+  fiber: number;
+  sodium: number;
+  potassium: number;
+  calcium: number;
+  iron: number;
+  vitaminA: number;
+  vitaminC: number;
+  vitaminD: number;
+  magnesium: number;
+  totalOrders: number;
+}
+
+interface AverageNutritionResponse {
+  orderDate: string;
+  filterType: string;
+  data: Nutrition | null;
+  dataByProvince: any[] | null;
+  dataBySchool: any[] | null;
+}
+
 const PageWrapper = styled.div`
   width: 100vw;
   height: 100vh;
@@ -306,35 +331,43 @@ const SmallStatCard = styled.div`
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mostOrderedFood, setMostOrderedFood] = useState<MostOrderedFood[]>([]);
+  const [nutrition, setNutrition] = useState<Nutrition | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMostOrderedFood = async () => {
+    const fetchData = async () => {
       try {
         const token = getStoredToken();
         const today = new Date();
         const orderDate = `${String(today.getDate()).padStart(2, "0")}:${String(today.getMonth() + 1).padStart(2, "0")}:${today.getFullYear()}`;
         
-        const endpoint = `${API_ENDPOINTS.FOOD_DEMAND.MOST_ORDERED}?order_date=${orderDate}&filter_type=all`;
+        const foodEndpoint = `${API_ENDPOINTS.FOOD_DEMAND.MOST_ORDERED}?order_date=${orderDate}&filter_type=all`;
+        const nutritionEndpoint = `${API_ENDPOINTS.FOOD_DEMAND.AVERAGE_NUTRITION}?order_date=${orderDate}&filter_type=all`;
         
-        const data = await apiRequest<MostOrderedFoodResponse>(
-          endpoint,
-          {
+        const [foodData, nutritionData] = await Promise.all([
+          apiRequest<MostOrderedFoodResponse>(foodEndpoint, {
             method: "GET",
             token: token || undefined,
-          }
-        );
+          }),
+          apiRequest<AverageNutritionResponse>(nutritionEndpoint, {
+            method: "GET",
+            token: token || undefined,
+          }),
+        ]);
+        
         // Limit to 10 items
-        setMostOrderedFood(data.mostOrderedFood.slice(0, 10));
+        setMostOrderedFood(foodData.mostOrderedFood.slice(0, 10));
+        setNutrition(nutritionData.data);
       } catch (error) {
-        console.error("Failed to fetch most ordered food:", error);
+        console.error("Failed to fetch data:", error);
         setMostOrderedFood([]);
+        setNutrition(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMostOrderedFood();
+    fetchData();
   }, []);
 
   return (
@@ -393,58 +426,62 @@ export default function Dashboard() {
             <NutritionCard>
               <TableHeader>Average Nutrition</TableHeader>
 
-              <BarWrapper>
+              {nutrition ? (
+                <BarWrapper>
+                  <BarRow>
+                    <BarLabel>Potassium – {nutrition.potassium.toFixed(1)} mg</BarLabel>
+                    <BarBackground>
+                      <BarFill width={`${Math.min((nutrition.potassium / 1000) * 100, 100)}%`} color="#C070FF" />
+                    </BarBackground>
+                  </BarRow>
 
-                <BarRow>
-                  <BarLabel>Potassium – 70%</BarLabel>
-                  <BarBackground>
-                    <BarFill width="70%" color="#C070FF" />
-                  </BarBackground>
-                </BarRow>
+                  <BarRow>
+                    <BarLabel>Calcium – {nutrition.calcium.toFixed(1)} mg</BarLabel>
+                    <BarBackground>
+                      <BarFill width={`${Math.min((nutrition.calcium / 300) * 100, 100)}%`} color="#67D4FF" />
+                    </BarBackground>
+                  </BarRow>
 
-                <BarRow>
-                  <BarLabel>Calcium – 65%</BarLabel>
-                  <BarBackground>
-                    <BarFill width="65%" color="#67D4FF" />
-                  </BarBackground>
-                </BarRow>
+                  <BarRow>
+                    <BarLabel>Iron (Zat Besi) – {nutrition.iron.toFixed(1)} mg</BarLabel>
+                    <BarBackground>
+                      <BarFill width={`${Math.min((nutrition.iron / 18) * 100, 100)}%`} color="#A05A2C" />
+                    </BarBackground>
+                  </BarRow>
 
-                <BarRow>
-                  <BarLabel>Iron (Zat Besi) – 58%</BarLabel>
-                  <BarBackground>
-                    <BarFill width="58%" color="#A05A2C" />
-                  </BarBackground>
-                </BarRow>
+                  <BarRow>
+                    <BarLabel>Vitamin A – {nutrition.vitaminA.toFixed(1)} mcg</BarLabel>
+                    <BarBackground>
+                      <BarFill width={`${Math.min((nutrition.vitaminA / 900) * 100, 100)}%`} color="#FFC447" />
+                    </BarBackground>
+                  </BarRow>
 
-                <BarRow>
-                  <BarLabel>Vitamin A – 82%</BarLabel>
-                  <BarBackground>
-                    <BarFill width="82%" color="#FFC447" />
-                  </BarBackground>
-                </BarRow>
+                  <BarRow>
+                    <BarLabel>Vitamin C – {nutrition.vitaminC.toFixed(1)} mg</BarLabel>
+                    <BarBackground>
+                      <BarFill width={`${Math.min((nutrition.vitaminC / 90) * 100, 100)}%`} color="#A8FF3A" />
+                    </BarBackground>
+                  </BarRow>
 
-                <BarRow>
-                  <BarLabel>Vitamin C – 75%</BarLabel>
-                  <BarBackground>
-                    <BarFill width="75%" color="#A8FF3A" />
-                  </BarBackground>
-                </BarRow>
+                  <BarRow>
+                    <BarLabel>Vitamin D – {nutrition.vitaminD.toFixed(1)} mcg</BarLabel>
+                    <BarBackground>
+                      <BarFill width={`${Math.min((nutrition.vitaminD / 20) * 100, 100)}%`} color="#FFF2A6" />
+                    </BarBackground>
+                  </BarRow>
 
-                <BarRow>
-                  <BarLabel>Vitamin D – 68%</BarLabel>
-                  <BarBackground>
-                    <BarFill width="68%" color="#FFF2A6" />
-                  </BarBackground>
-                </BarRow>
-
-                <BarRow>
-                  <BarLabel>Magnesium – 60%</BarLabel>
-                  <BarBackground>
-                    <BarFill width="60%" color="#7A90A4" />
-                  </BarBackground>
-                </BarRow>
-
-              </BarWrapper>
+                  <BarRow>
+                    <BarLabel>Magnesium – {nutrition.magnesium.toFixed(1)} mg</BarLabel>
+                    <BarBackground>
+                      <BarFill width={`${Math.min((nutrition.magnesium / 420) * 100, 100)}%`} color="#7A90A4" />
+                    </BarBackground>
+                  </BarRow>
+                </BarWrapper>
+              ) : (
+                <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                  No nutrition data available
+                </div>
+              )}
             </NutritionCard>
           </TopRow>
 
